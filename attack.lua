@@ -42,8 +42,8 @@ local function castOnTarget(targetID, targetName, spellName)
 
     -- Monitor casting and conditions
     while mq.TLO.Me.Casting() do
-        -- Stop casting if the buff is already on the target or target's HP is below 20%
-        if mq.TLO.Target.Buff(spellName)() or (mq.TLO.Target.PctHPs() < 40 and not mq.TLO.Target.Named()) then
+        -- Ensure .Buff() is not nil and proceed with other conditions
+        if mq.TLO.Target.Buff(spellName)() ~= nil or (mq.TLO.Target.PctHPs() < 40 and not mq.TLO.Target.Named()) then
             mq.cmd('/stopcast')
             break
         end
