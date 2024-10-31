@@ -16,7 +16,7 @@ local hotQueue = {}
 
 -- Helper function: Check if we have enough mana to cast the spell
 local function hasEnoughMana(spellName)
-    if not spellName or not mq.TLO.Spell(spellName) then return false end
+    if not spellName then return false end
     return mq.TLO.Me.CurrentMana() >= mq.TLO.Spell(spellName).Mana()
 end
 
@@ -32,8 +32,7 @@ end
 
 local function isGroupMember(targetID)
     for i = 0, 5 do
-        local groupMember = mq.TLO.Group.Member(i)
-        local groupMemberID = groupMember and groupMember.ID()
+        local groupMemberID = mq.TLO.Group.Member(i).ID()
         if groupMemberID and groupMemberID == targetID then
             return true
         end
@@ -49,7 +48,7 @@ end
 -- Check if target is within spell range, safely handling nil target
 local function isTargetInRange(targetID, spellName)
     local target = mq.TLO.Spawn(targetID)
-    local spellRange = mq.TLO.Spell(spellName) and mq.TLO.Spell(spellName).Range()
+    local spellRange = mq.TLO.Spell(spellName).Range()
 
     -- Check if both target and spell range exist to avoid nil errors
     if target and target.Distance() and spellRange then
@@ -64,15 +63,18 @@ local function castSpell(targetID, targetName, spellName)
     mq.cmdf('/dgtell ALL %s - Casting %s on %s', clericName, spellName, targetName)
     mq.cmdf('/tar ID %s', targetID)
     mq.delay(200)
-    if targetID ~= (mq.TLO.Target.ID() or 0) then
+    if targetID ~= mq.TLO.Target.ID() then
         mq.cmdf('/tar ID %s', targetID)
         mq.delay(200)
     end
     mq.cmdf('/cast %s', spellName)
+    mq.cmdf('/cast %s', spellName)
     while mq.TLO.Me.Casting() do
-        if gui.stopCast and mq.TLO.Target() and mq.TLO.Target.PctHPs() >= 95 then
-            mq.cmd('/stopcast')
-            break
+        if gui.stopCast then
+            if mq.TLO.Target() and mq.TLO.Target.PctHPs() >= 95 then
+                mq.cmd('/stopcast')
+                break
+            end
         end
         mq.delay(50)
     end    
@@ -89,10 +91,11 @@ local function processHealsForTarget(targetID, targetName, targetHP, targetClass
 
     -- Define HoT conditions and threshold
     local hotThreshold = (isExtendedTarget and gui["ExtTargetHoT" .. extIndex .. "Pct"]) or gui.hotPct
-    local hotDuration = mq.TLO.Spell(hotSpell) and mq.TLO.Spell(hotSpell).Duration.TotalSeconds() or 0
+    local hotDuration = mq.TLO.Spell(hotSpell).Duration.TotalSeconds() or 0
 
     -- Only proceed if target meets all conditions for HoT
     if gui.useHoT and clericLevel >= 19 and targetHP <= hotThreshold then
+        -- Extended target handling (apply additional checks here if needed)
         local isValidExtendedTarget = isExtendedTarget and gui["ExtTargetHoT" .. extIndex] and targetHP <= gui["ExtTargetHoT" .. extIndex .. "Pct"]
         
         if (isValidExtendedTarget or (not isExtendedTarget and (targetClass == "WAR" or targetClass == "PAL" or targetClass == "SHD"))) and 

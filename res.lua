@@ -25,20 +25,25 @@ local function preCastChecks()
 end
 
 local function hasEnoughMana(spellName)
-    if gui.useEpic then
-        return true
-    elseif spellName and mq.TLO.Spell(spellName) and mq.TLO.Me.CurrentMana() >= mq.TLO.Spell(spellName).Mana() then
+    if gui.useEpic == true then
         return true
     else
-        return false
+        if not spellName then
+            return false
+        elseif mq.TLO.Me.CurrentMana() < mq.TLO.Spell(spellName).Mana() then
+            return false
+        else
+            return true
+        end
     end
 end
 
 -- Check if target is within spell range, safely handling nil target
 local function isTargetInRange(targetID, spellName)
     local target = mq.TLO.Spawn(targetID)
-    local spellRange = mq.TLO.Spell(spellName) and mq.TLO.Spell(spellName).Range()
+    local spellRange = mq.TLO.Spell(spellName).Range()
 
+    -- Check if both target and spell range exist to avoid nil errors
     if target and target.Distance() and spellRange then
         return target.Distance() <= spellRange
     else
@@ -96,7 +101,7 @@ end
 
 -- Function to add a corpse to the resurrection queue, checks cooldown status
 local function queueResurrection(corpse, resSpell)
-    local corpseName = corpse and corpse.CleanName() or "Unknown"
+    local corpseName = corpse.CleanName()
     if validateCorpseForResurrection(corpse) and not res.resQueue[corpse.ID()] and not isOnCooldown(corpseName) then
         table.insert(res.resQueue, {corpse = corpse, spell = resSpell, slot = 8})
     elseif isOnCooldown(corpseName) then
@@ -274,7 +279,7 @@ function res.resRoutine()
             return
         end
 
-        local inRaid, inGroup = (mq.TLO.Raid.Members() or 0) > 0, mq.TLO.Me.Grouped()
+        local inRaid, inGroup = mq.TLO.Raid.Members() > 0, mq.TLO.Me.Grouped()
         local bestResSpell = clericspells.findBestSpell("Resurrection", clericLevel)
 
         if not gui.useEpic then
@@ -287,13 +292,13 @@ function res.resRoutine()
         end
 
         -- Check for nearby corpses before loading the spell
-        local nearbyCorpses = mq.TLO.SpawnCount('pccorpse radius ' .. dragDistance)() or 0
+        local nearbyCorpses = mq.TLO.SpawnCount('pccorpse radius ' .. dragDistance)()
         if nearbyCorpses == 0 then
             return
         end
 
         -- Load the resurrection spell if it is not already loaded in Gem 8
-        if bestResSpell and tostring(mq.TLO.Me.Gem(8)) ~= bestResSpell and not gui.useEpic then
+        if tostring(mq.TLO.Me.Gem(8)) ~= bestResSpell and not gui.useEpic then
             clericspells.loadAndMemorizeSpell("Resurrection", clericLevel, 8)
         end
 
@@ -310,6 +315,7 @@ function res.resRoutine()
         -- Process the resurrection queue if any corpses were added
         if resurrectCount > 0 then
             processResurrectionQueue()
+        else
         end
     end
 end

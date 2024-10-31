@@ -8,7 +8,7 @@ local charLevel = mq.TLO.Me.Level() or 0
 
 -- Helper function: Check if we have enough mana to cast the spell
 local function hasEnoughMana(spellName)
-    return spellName and mq.TLO.Me.CurrentMana() >= (mq.TLO.Spell(spellName) and mq.TLO.Spell(spellName).Mana() or 0)
+    return spellName and mq.TLO.Me.CurrentMana() >= mq.TLO.Spell(spellName).Mana()
 end
 
 -- Helper function: Pre-cast checks for movement and casting status
@@ -19,7 +19,7 @@ end
 -- Check if target is within spell range
 local function isTargetInRange(targetID, spellName)
     local target = mq.TLO.Spawn(targetID)
-    local spellRange = mq.TLO.Spell(spellName) and mq.TLO.Spell(spellName).Range()
+    local spellRange = mq.TLO.Spell(spellName).Range()
 
     if target and target.Distance() and spellRange then
         return target.Distance() <= spellRange
@@ -31,7 +31,7 @@ end
 -- Function to cast spell on the target
 local function castOnTarget(targetID, targetName, spellName)
     -- Ensure we are targeting the right ID
-    if targetID and targetID ~= mq.TLO.Target.ID() then
+    if targetID ~= mq.TLO.Target.ID() then
         mq.cmdf('/target id %d', targetID)
         mq.delay(200)
     end
@@ -43,7 +43,7 @@ local function castOnTarget(targetID, targetName, spellName)
     -- Monitor casting and conditions
     while mq.TLO.Me.Casting() do
         -- Check if there is a valid target and the buff exists on the target
-        if mq.TLO.Target() and (mq.TLO.Target.Buff(spellName)() ~= nil or (mq.TLO.Target.PctHPs() and mq.TLO.Target.PctHPs() < 40 and not mq.TLO.Target.Named())) then
+        if mq.TLO.Target() and (mq.TLO.Target.Buff(spellName)() ~= nil or (mq.TLO.Target.PctHPs() < 40 and not mq.TLO.Target.Named())) then
             mq.cmd('/stopcast')
             break
         end
@@ -70,8 +70,7 @@ function attack.attackRoutine()
     if not bestAttackSpell then
         return
     end
-
-    -- Load the resurrection spell if it is not already loaded in Gem 8
+        -- Load the resurrection spell if it is not already loaded in Gem 8
     if tostring(mq.TLO.Me.Gem(8)) ~= bestAttackSpell and gui.useKarn then
         clericspells.loadAndMemorizeSpell("ReverseDS", charLevel, 8)
     end
@@ -80,17 +79,18 @@ function attack.attackRoutine()
     mq.cmdf('/assist %s', gui.mainAssist)
     mq.delay(400)
 
-    local targetHP = mq.TLO.Target.PctHPs() or 100
-    local targetDistance = mq.TLO.Target.Distance() or 0
+    local targetHP = mq.TLO.Target.PctHPs()
+    local targetDistance = mq.TLO.Target.Distance()
     local targetID = mq.TLO.Target.ID()
 
     if targetID and mq.TLO.Target.Type() == "NPC" and targetDistance <= gui.assistRange and targetHP <= gui.assistPercent and (targetHP > 40 or mq.TLO.Target.Named()) then
         if mq.TLO.Target.AggroHolder() == gui.mainAssist and not mq.TLO.Target.Buff(bestAttackSpell)() then
             if hasEnoughMana(bestAttackSpell) and mq.TLO.Me.SpellReady(bestAttackSpell)() and isTargetInRange(targetID, bestAttackSpell) and preCastChecks() then
-                castOnTarget(targetID, mq.TLO.Target.CleanName() or "Unknown Target", bestAttackSpell)
+                castOnTarget(targetID, mq.TLO.Target.CleanName(), bestAttackSpell)
             end
         end
     end
+    
 end
 
 return attack
