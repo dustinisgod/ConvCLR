@@ -14,13 +14,13 @@ end
 
 -- Helper function: Check if we have enough mana to cast the spell
 local function hasEnoughMana(spellName)
-    return spellName and mq.TLO.Me.CurrentMana() >= mq.TLO.Spell(spellName).Mana()
+    return spellName and mq.TLO.Spell(spellName) and mq.TLO.Me.CurrentMana() >= mq.TLO.Spell(spellName).Mana()
 end
 
 -- Check if target is within spell range, safely handling nil target
 local function isTargetInRange(targetID, spellName)
     local target = mq.TLO.Spawn(targetID)
-    local spellRange = mq.TLO.Spell(spellName).Range()
+    local spellRange = mq.TLO.Spell(spellName) and mq.TLO.Spell(spellName).Range()
 
     if target and target.Distance() and spellRange then
         return target.Distance() <= spellRange
@@ -49,7 +49,7 @@ function buffer.buffRoutine()
         return
     end
 
-    local clericLevel = mq.TLO.Me.Level()
+    local clericLevel = mq.TLO.Me.Level() or 0
     local spellTypes = {}
 
     -- Determine which buffs to apply based on cleric level and GUI settings
@@ -76,13 +76,13 @@ function buffer.buffRoutine()
     local groupMembers = {}
 
     -- Include self if not dead
-    if not mq.TLO.Me.Dead() then table.insert(groupMembers, mq.TLO.Me.ID()) end
+    if not mq.TLO.Me.Dead() then table.insert(groupMembers, mq.TLO.Me.ID() or 0) end
 
     -- Add group members if buffGroup is enabled
     if gui.buffGroup then
-        for i = 1, mq.TLO.Group.Members() do
+        for i = 1, mq.TLO.Group.Members() or 0 do
             local member = mq.TLO.Group.Member(i)
-            if member.ID() and not member.Dead() then
+            if member and member.ID() and not member.Dead() then
                 table.insert(groupMembers, member.ID())
             end
         end
@@ -90,9 +90,9 @@ function buffer.buffRoutine()
 
     -- Add raid members if buffRaid is enabled
     if gui.buffRaid then
-        for i = 1, mq.TLO.Raid.Members() do
+        for i = 1, mq.TLO.Raid.Members() or 0 do
             local member = mq.TLO.Raid.Member(i)
-            if member.ID() and not member.Dead() then
+            if member and member.ID() and not member.Dead() then
                 table.insert(groupMembers, member.ID())
             end
         end
@@ -116,7 +116,7 @@ function buffer.buffRoutine()
                 mq.cmdf("/target id %d", memberID)
                 mq.delay(500)
 
-                if not mq.TLO.Target.Dead() and not mq.TLO.Target.Buff(bestSpell)() and mq.TLO.Spell(bestSpell).StacksTarget() then
+                if mq.TLO.Target() and not mq.TLO.Target.Dead() and not mq.TLO.Target.Buff(bestSpell)() and mq.TLO.Spell(bestSpell).StacksTarget() then
                     table.insert(buffer.buffQueue, {memberID = memberID, spell = bestSpell, spellType = spellType, slot = (spellType == "BuffACHP" and 6 or (spellType == "BuffHPOnly" and 7 or 8))})
                 end
             end
@@ -158,7 +158,7 @@ function buffer.processBuffQueue()
         mq.cmdf('/target id %d', buffTask.memberID)
         mq.delay(200)
 
-        if mq.TLO.Target.Buff(buffTask.spell)() then
+        if mq.TLO.Target() and mq.TLO.Target.Buff(buffTask.spell)() then
             break
         end
 
@@ -184,7 +184,7 @@ function buffer.processBuffQueue()
 
         mq.delay(100)
 
-        if not mq.TLO.Spawn(buffTask.memberID).Buff(buffTask.spell)() then
+        if mq.TLO.Spawn(buffTask.memberID) and not mq.TLO.Spawn(buffTask.memberID).Buff(buffTask.spell)() then
             table.insert(buffer.buffQueue, buffTask)
         end
 

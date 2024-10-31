@@ -6,25 +6,24 @@ local attack = require('attack')
 
 function utils.PluginCheck()
     if utils.IsUsingDanNet then
-        if not mq.TLO.Plugin('mq2dannet').IsLoaded() then
+        if not mq.TLO.Plugin('mq2dannet') or not mq.TLO.Plugin('mq2dannet').IsLoaded() then
             printf("Plugin \ayMQ2DanNet\ax is required. Loading it now.")
             mq.cmd('/plugin mq2dannet noauto')
         end
-        -- turn off fullname mode in DanNet
-        if mq.TLO.DanNet.FullNames() then
+        -- turn off fullname mode in DanNet if it's active
+        if mq.TLO.DanNet and mq.TLO.DanNet.FullNames() then
             mq.cmd('/dnet fullnames off')
         end
     end
 end
 
 function utils.isInGroup()
-    local inGroup = mq.TLO.Group() and mq.TLO.Group.Members() > 0
+    local inGroup = mq.TLO.Group() and (mq.TLO.Group.Members() or 0) > 0
     return inGroup
 end
 
--- Utility: Check if the player is in a group or raid
 function utils.isInRaid()
-    local inRaid = mq.TLO.Raid.Members() > 0
+    local inRaid = (mq.TLO.Raid.Members() or 0) > 0
     return inRaid
 end
 
@@ -104,13 +103,13 @@ end
 
 function utils.sitMed()
     if gui.botOn and gui.sitMed and mq.TLO.Me.PctMana() < 100 and not mq.TLO.Me.Mount() then
-        local nearbyNPCs = mq.TLO.SpawnCount(string.format('npc radius %d', gui.assistRange))()
+        local nearbyNPCs = mq.TLO.SpawnCount(string.format('npc radius %d', gui.assistRange))() or 0
 
-        if mq.TLO.Me.PctHPs() < gui.mainHealPct and nearbyNPCs > 0 then
+        if mq.TLO.Me.PctHPs() < (gui.mainHealPct or 100) and nearbyNPCs > 0 then
             return
         end
 
-        if nearbyNPCs == 0 or (mq.TLO.Me.PctHPs() >= gui.mainHealPct) then
+        if nearbyNPCs == 0 or (mq.TLO.Me.PctHPs() >= (gui.mainHealPct or 100)) then
             if not mq.TLO.Me.Casting() and not mq.TLO.Me.Moving() then
                 if not mq.TLO.Me.Sitting() then
                     mq.cmd('/sit')

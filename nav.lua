@@ -8,10 +8,10 @@ local campLocation = nil
 -- Function to set the camp location with zone information
 function nav.setCamp()
     campLocation = {
-        x = mq.TLO.Me.X(),
-        y = mq.TLO.Me.Y(),
-        z = mq.TLO.Me.Z(),
-        zone = mq.TLO.Zone.ShortName()
+        x = mq.TLO.Me.X() or 0,
+        y = mq.TLO.Me.Y() or 0,
+        z = mq.TLO.Me.Z() or 0,
+        zone = mq.TLO.Zone.ShortName() or "Unknown"
     }
     print(string.format("Camp location set at your current position in zone %s.", campLocation.zone))
 end
@@ -26,14 +26,14 @@ function nav.checkCampDistance()
         end
 
         -- Retrieve current position
-        local currentX = mq.TLO.Me.X()
-        local currentY = mq.TLO.Me.Y()
+        local currentX = mq.TLO.Me.X() or 0
+        local currentY = mq.TLO.Me.Y() or 0
 
         -- Calculate distance to camp using the distance formula
         local distance = math.sqrt((campLocation.x - currentX)^2 + (campLocation.y - currentY)^2)
         
         -- Check if distance exceeds the camp radius (campDistance)
-        if distance > gui.campDistance and not mq.TLO.Me.Casting() then
+        if distance > (gui.campDistance or 50) and not mq.TLO.Me.Casting() then
             mq.cmdf('/nav locyx %f %f distance=5', campLocation.y, campLocation.x)
         
             local startTime = os.time()  -- Record the start time for timeout
@@ -57,8 +57,8 @@ end
 function nav.chase()
     if gui.chaseTarget ~= "" and gui.chaseDistance then
         local target = mq.TLO.Spawn(gui.chaseTarget)
-        if target() and not mq.TLO.Me.Casting() then
-            local distance = target.Distance3D()
+        if target and target() and not mq.TLO.Me.Casting() then
+            local distance = target.Distance3D() or 0
             if distance > gui.chaseDistance then
                 mq.cmdf('/nav id %d distance=5', target.ID())
                 while mq.TLO.Me.Moving() do
@@ -68,7 +68,6 @@ function nav.chase()
         end
     end
 end
-
 
 -- Define setChaseTargetAndDistance within nav
 function nav.setChaseTargetAndDistance(targetName, distance)
@@ -89,7 +88,7 @@ function nav.setChaseTargetAndDistance(targetName, distance)
         local targetSpawn = mq.TLO.Spawn(targetName)
         
         -- Validate target and path existence
-        if targetSpawn() and targetSpawn.Type() == 'PC' and mq.TLO.Navigation.PathExists("id " .. targetSpawn.ID())() then
+        if targetSpawn and targetSpawn() and targetSpawn.Type() == 'PC' and mq.TLO.Navigation.PathExists("id " .. targetSpawn.ID())() then
             local distanceNum = tonumber(distance)
             if distanceNum then
                 gui.chaseTarget = targetName
@@ -105,6 +104,5 @@ function nav.setChaseTargetAndDistance(targetName, distance)
         end
     end
 end
-
 
 return nav

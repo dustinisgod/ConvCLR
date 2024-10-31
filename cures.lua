@@ -12,8 +12,8 @@ local MAX_CURE_RETRIES = 3  -- Maximum retries for each cure attempt
 local charLevel = mq.TLO.Me.Level()
 
 local function isGroupMember(targetID)
-    for i = 1, mq.TLO.Group.Members() do
-        if mq.TLO.Group.Member(i).ID() == targetID then
+    for i = 1, mq.TLO.Group.Members() or 0 do
+        if mq.TLO.Group.Member(i) and mq.TLO.Group.Member(i).ID() == targetID then
             return true
         end
     end
@@ -31,19 +31,19 @@ end
 
 -- Function to check if the cure spell is ready and mana is sufficient
 local function preCureChecks(spellName)
-    return not mq.TLO.Me.Moving() and not mq.TLO.Me.Casting() and mq.TLO.Me.PctMana() >= 20
+    return not mq.TLO.Me.Moving() and not mq.TLO.Me.Casting() and mq.TLO.Me.PctMana() >= 20 and mq.TLO.Spell(spellName)
 end
 
 -- Helper function: Check if we have enough mana to cast the spell
 local function hasEnoughMana(spellName)
-    if not spellName then return false end
+    if not spellName or not mq.TLO.Spell(spellName) then return false end
     return mq.TLO.Me.CurrentMana() >= mq.TLO.Spell(spellName).Mana()
 end
 
 -- Check if target is within spell range, safely handling nil target
 local function isTargetInRange(targetID, spellName)
     local target = mq.TLO.Spawn(targetID)
-    local spellRange = mq.TLO.Spell(spellName).Range()
+    local spellRange = mq.TLO.Spell(spellName) and mq.TLO.Spell(spellName).Range()
 
     -- Check if both target and spell range exist to avoid nil errors
     if target and target.Distance() and spellRange then
@@ -53,12 +53,11 @@ local function isTargetInRange(targetID, spellName)
     end
 end
 
-
 local function queueAfflictedMembers()
-    local clericLevel = mq.TLO.Me.Level()  -- Get cleric level once for all checks
+    local clericLevel = mq.TLO.Me.Level() or 0  -- Get cleric level once for all checks
 
     -- Loop through each group member
-    for i = 1, mq.TLO.Group.Members() do
+    for i = 1, mq.TLO.Group.Members() or 0 do
         local member = mq.TLO.Group.Member(i)
         local memberID = member and member.ID()
 
@@ -71,9 +70,9 @@ local function queueAfflictedMembers()
         mq.delay(100)
 
         -- Only add to cureQueue if cleric meets the required level for each affliction
-        if mq.TLO.Target.Poisoned() and clericLevel >= 22 then
+        if mq.TLO.Target() and mq.TLO.Target.Poisoned() and clericLevel >= 22 then
             table.insert(cureQueue, {name = member.Name(), type = "Poison"})
-        elseif mq.TLO.Target.Diseased() and clericLevel >= 4 then
+        elseif mq.TLO.Target() and mq.TLO.Target.Diseased() and clericLevel >= 4 then
             table.insert(cureQueue, {name = member.Name(), type = "Disease"})
         end
 
@@ -92,9 +91,9 @@ local function queueAfflictedMembers()
                 mq.delay(200)
 
                 -- Only add to cureQueue if cleric meets the required level for each affliction
-                if mq.TLO.Target.Poisoned() and clericLevel >= 22 then
+                if mq.TLO.Target() and mq.TLO.Target.Poisoned() and clericLevel >= 22 then
                     table.insert(cureQueue, {name = extTarget.CleanName(), type = "Poison"})
-                elseif mq.TLO.Target.Diseased() and clericLevel >= 4 then
+                elseif mq.TLO.Target() and mq.TLO.Target.Diseased() and clericLevel >= 4 then
                     table.insert(cureQueue, {name = extTarget.CleanName(), type = "Disease"})
                 end
             end

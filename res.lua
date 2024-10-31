@@ -25,25 +25,20 @@ local function preCastChecks()
 end
 
 local function hasEnoughMana(spellName)
-    if gui.useEpic == true then
+    if gui.useEpic then
+        return true
+    elseif spellName and mq.TLO.Spell(spellName) and mq.TLO.Me.CurrentMana() >= mq.TLO.Spell(spellName).Mana() then
         return true
     else
-        if not spellName then
-            return false
-        elseif mq.TLO.Me.CurrentMana() < mq.TLO.Spell(spellName).Mana() then
-            return false
-        else
-            return true
-        end
+        return false
     end
 end
 
 -- Check if target is within spell range, safely handling nil target
 local function isTargetInRange(targetID, spellName)
     local target = mq.TLO.Spawn(targetID)
-    local spellRange = mq.TLO.Spell(spellName).Range()
+    local spellRange = mq.TLO.Spell(spellName) and mq.TLO.Spell(spellName).Range()
 
-    -- Check if both target and spell range exist to avoid nil errors
     if target and target.Distance() and spellRange then
         return target.Distance() <= spellRange
     else
@@ -101,7 +96,7 @@ end
 
 -- Function to add a corpse to the resurrection queue, checks cooldown status
 local function queueResurrection(corpse, resSpell)
-    local corpseName = corpse.CleanName()
+    local corpseName = corpse and corpse.CleanName() or "Unknown"
     if validateCorpseForResurrection(corpse) and not res.resQueue[corpse.ID()] and not isOnCooldown(corpseName) then
         table.insert(res.resQueue, {corpse = corpse, spell = resSpell, slot = 8})
     elseif isOnCooldown(corpseName) then
@@ -190,9 +185,13 @@ local function processResurrectionQueue()
                             local dragAttempts = 0
                             local maxDragAttempts = 3
                             while dragAttempts < maxDragAttempts do
-                                if mq.TLO.Target.Distance() > resurrectionDistance and mq.TLO.Target.Distance() <= dragDistance then
-                                    mq.cmd('/corpse')
-                                    mq.delay(500)
+                                if mq.TLO.Target() and mq.TLO.Target.Distance() then
+                                    if mq.TLO.Target.Distance() > resurrectionDistance and mq.TLO.Target.Distance() <= dragDistance then
+                                        mq.cmd('/corpse')
+                                        mq.delay(500)
+                                    end
+
+                                
 
                                     -- Process events and check if the consent error occurred
                                     consentEvent = false  -- Reset flag before processing events
@@ -275,7 +274,7 @@ function res.resRoutine()
             return
         end
 
-        local inRaid, inGroup = mq.TLO.Raid.Members() > 0, mq.TLO.Me.Grouped()
+        local inRaid, inGroup = (mq.TLO.Raid.Members() or 0) > 0, mq.TLO.Me.Grouped()
         local bestResSpell = clericspells.findBestSpell("Resurrection", clericLevel)
 
         if not gui.useEpic then
@@ -288,13 +287,13 @@ function res.resRoutine()
         end
 
         -- Check for nearby corpses before loading the spell
-        local nearbyCorpses = mq.TLO.SpawnCount('pccorpse radius ' .. dragDistance)()
+        local nearbyCorpses = mq.TLO.SpawnCount('pccorpse radius ' .. dragDistance)() or 0
         if nearbyCorpses == 0 then
             return
         end
 
         -- Load the resurrection spell if it is not already loaded in Gem 8
-        if tostring(mq.TLO.Me.Gem(8)) ~= bestResSpell and not gui.useEpic then
+        if bestResSpell and tostring(mq.TLO.Me.Gem(8)) ~= bestResSpell and not gui.useEpic then
             clericspells.loadAndMemorizeSpell("Resurrection", clericLevel, 8)
         end
 
@@ -311,7 +310,6 @@ function res.resRoutine()
         -- Process the resurrection queue if any corpses were added
         if resurrectCount > 0 then
             processResurrectionQueue()
-        else
         end
     end
 end
