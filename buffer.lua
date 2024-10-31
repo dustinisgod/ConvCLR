@@ -22,18 +22,17 @@ local function isTargetInRange(targetID, spellName)
     local target = mq.TLO.Spawn(targetID)
     local spellRange = mq.TLO.Spell(spellName).Range()
 
-    -- Check if both target and spell range exist to avoid nil errors
     if target and target.Distance() and spellRange then
         return target.Distance() <= spellRange
     else
-        return false  -- Return false if the target doesn't exist or range can't be determined
+        return false
     end
 end
 
 -- Function to handle the heal routine and return
 local function handleHealRoutineAndReturn()
     healing.healRoutine()
-    return true -- Assuming heal routine passes, return to continue buffing
+    return true
 end
 
 -- Buffing routine including self-buffing for the cleric
@@ -41,6 +40,11 @@ function buffer.buffRoutine()
     if not gui.botOn then return end
 
     if not preCastChecks() then
+        return
+    end
+
+    if mq.TLO.Me.PctMana() < 20 then
+        utils.sitMed()
         return
     end
 
@@ -67,13 +71,30 @@ function buffer.buffRoutine()
         if resist.checked then table.insert(spellTypes, resist.type) end
     end
 
-    -- Prepare a list of group members and add the cleric's ID for self-buffing
+    -- Collect group or raid members based on GUI settings
     local groupMembers = {}
+
+    -- Include self if not dead
     if not mq.TLO.Me.Dead() then table.insert(groupMembers, mq.TLO.Me.ID()) end
 
-    for i = 1, mq.TLO.Group.Members() do
-        local member = mq.TLO.Group.Member(i)
-        if member.ID() and not member.Dead() then table.insert(groupMembers, member.ID()) end
+    -- Add group members if buffGroup is enabled
+    if gui.buffGroup then
+        for i = 1, mq.TLO.Group.Members() do
+            local member = mq.TLO.Group.Member(i)
+            if member.ID() and not member.Dead() then
+                table.insert(groupMembers, member.ID())
+            end
+        end
+    end
+
+    -- Add raid members if buffRaid is enabled
+    if gui.buffRaid then
+        for i = 1, mq.TLO.Raid.Members() do
+            local member = mq.TLO.Raid.Member(i)
+            if member.ID() and not member.Dead() then
+                table.insert(groupMembers, member.ID())
+            end
+        end
     end
 
     -- Process each spell type
@@ -87,6 +108,9 @@ function buffer.buffRoutine()
             -- Check each member (including the cleric) for missing buff and add to queue
             for _, memberID in ipairs(groupMembers) do
                 if not gui.botOn then return end
+                if not handleHealRoutineAndReturn() then
+                    return
+                end
 
                 mq.cmdf("/target id %d", memberID)
                 mq.delay(500)
@@ -108,23 +132,22 @@ end
 function buffer.processBuffQueue()
     while #buffer.buffQueue > 0 do
         if not gui.botOn then
-            return  -- Stop processing if bot is turned off
+            return
         end
 
         local buffTask = table.remove(buffer.buffQueue, 1)
-
         local maxReadyAttempts = 20
         local readyAttempt = 0
 
         while not mq.TLO.Me.SpellReady(buffTask.spell)() and readyAttempt < maxReadyAttempts do
-            if not gui.botOn then return end  -- Stop if bot is turned off mid-wait
+            if not gui.botOn then return end
             readyAttempt = readyAttempt + 1
             if gui.mainHeal or gui.fastHeal or gui.completeHeal then
                 if not handleHealRoutineAndReturn() then
                     return
                 end
             end
-            mq.delay(1000)  -- Wait 1 second before checking again
+            mq.delay(1000)
         end
 
         if not mq.TLO.Me.SpellReady(buffTask.spell)() then
@@ -152,7 +175,7 @@ function buffer.processBuffQueue()
 
         while mq.TLO.Me.Casting() do
             if not gui.botOn then
-                mq.cmd('/stopcast')  -- Gracefully stop casting if bot is turned off
+                mq.cmd('/stopcast')
                 return
             end
             mq.delay(50)
@@ -160,10 +183,7 @@ function buffer.processBuffQueue()
 
         mq.delay(100)
 
-        if mq.TLO.Spawn(buffTask.memberID).Buff(buffTask.spell)() then
-            -- Buff was successfully applied
-        else
-            -- Requeue if buff did not apply
+        if not mq.TLO.Spawn(buffTask.memberID).Buff(buffTask.spell)() then
             table.insert(buffer.buffQueue, buffTask)
         end
 

@@ -83,16 +83,20 @@ function utils.monitorBuffs()
         local currentTime = os.time()
 
         if (gui.achpBuff or
-        gui.hpOnlyBuff or
-        gui.acOnlyBuff or
-        gui.resistMagic or
-        gui.resistCold or
-        gui.resistFire or
-        gui.resistDisease or
-        gui.resistPoison) and (currentTime - lastBuffTime >= 240) then
+            gui.hpOnlyBuff or
+            gui.acOnlyBuff or
+            gui.resistMagic or
+            gui.resistCold or
+            gui.resistFire or
+            gui.resistDisease or
+            gui.resistPoison) and (currentTime >= lastBuffTime) then
+            
             if mq.TLO.Me.PctMana() > 20 then
                 buffer.buffRoutine()
-                lastBuffTime = currentTime
+
+                -- Set lastBuffTime to the current time + random interval
+                local randomDelay = math.random(240, 360)  -- Random delay between 240 and 360 seconds
+                lastBuffTime = currentTime + randomDelay
             end
         end
     end

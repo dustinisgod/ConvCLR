@@ -1,9 +1,10 @@
 local mq = require('mq')
 local gui = require('gui')
 local clericspells = require('clericspells')
+
 local attack = {}
 
-local clericLevel = mq.TLO.Me.Level() or 0
+local charLevel = mq.TLO.Me.Level() or 0
 
 -- Helper function: Check if we have enough mana to cast the spell
 local function hasEnoughMana(spellName)
@@ -56,8 +57,14 @@ function attack.attackRoutine()
         return
     end
 
+    if mq.TLO.Me.PctMana() < 20 then
+        local utils = require('utils')
+        utils.sitMed()
+        return
+    end
+
     -- Find the best Reverse Damage Shield spell
-    local bestAttackSpell = clericspells.findBestSpell("ReverseDS", clericLevel)
+    local bestAttackSpell = clericspells.findBestSpell("ReverseDS", charLevel)
 
     -- Only proceed if we have a valid spell to cast
     if not bestAttackSpell then
@@ -65,24 +72,25 @@ function attack.attackRoutine()
     end
         -- Load the resurrection spell if it is not already loaded in Gem 8
     if tostring(mq.TLO.Me.Gem(8)) ~= bestAttackSpell and gui.useKarn then
-        clericspells.loadAndMemorizeSpell("ReverseDS", clericLevel, 8)
+        clericspells.loadAndMemorizeSpell("ReverseDS", charLevel, 8)
     end
 
     -- Assist main assist to obtain target
     mq.cmdf('/assist %s', gui.mainAssist)
     mq.delay(400)
 
-    -- Verify we have a valid NPC target
+    local targetHP = mq.TLO.Target.PctHPs()
+    local targetDistance = mq.TLO.Target.Distance()
     local targetID = mq.TLO.Target.ID()
-    if targetID and mq.TLO.Target.Type() == "NPC" and mq.TLO.Target.Distance() <= gui.assistRange and (mq.TLO.Target.PctHPs() > 40 or mq.TLO.Target.Named()) then
-        -- Check if target is Tashed and ready for the Reverse Damage Shield
+
+    if targetID and mq.TLO.Target.Type() == "NPC" and targetDistance <= gui.assistRange and targetHP <= gui.assistPercent and (targetHP > 40 or mq.TLO.Target.Named()) then
         if mq.TLO.Target.AggroHolder() == gui.mainAssist and not mq.TLO.Target.Buff(bestAttackSpell)() then
-            -- Perform checks: mana, spell readiness, range, and pre-cast status
             if hasEnoughMana(bestAttackSpell) and mq.TLO.Me.SpellReady(bestAttackSpell)() and isTargetInRange(targetID, bestAttackSpell) and preCastChecks() then
                 castOnTarget(targetID, mq.TLO.Target.CleanName(), bestAttackSpell)
             end
         end
     end
+    
 end
 
 return attack

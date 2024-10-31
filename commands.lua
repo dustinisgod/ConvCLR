@@ -30,6 +30,10 @@ local function setAssistRange(value)
     print("Assist Range set to ", gui.assistRange)
 end
 
+local function setAssistPercent(value)
+    gui.assistPercent = tonumber(value) or gui.assistPercent
+    print("Assist Percent set to ", gui.assistPercent)
+end
 
 local function togglemainheal() 
     gui.mainheal = not gui.mainheal 
@@ -59,6 +63,16 @@ end
 local function toggleUseCures() 
     gui.useCures = not gui.useCures 
     print("Use Cures is now", gui.useCures and "enabled" or "disabled")
+end
+
+local function setBuffGroup()
+    gui.buffGroup = true
+    print("Buffing group is now enabled.")
+end
+
+local function setBuffRaid()
+    gui.buffRaid = true
+    print("Buffing raid is now enabled.")
 end
 
 local function toggleAchpBuff() 
@@ -192,12 +206,15 @@ mq.bind('/ccOff', setBotOff)
 mq.bind('/ccSave', setSave)
 mq.bind('/ccMainAssist', utils.setMainAssist)
 mq.bind('/ccAssistRange', setAssistRange)
+mq.bind('/ccAssistPercent', setAssistPercent)
 mq.bind('/ccMainHeal', togglemainheal)
 mq.bind('/ccHoT', toggleUseHoT)
 mq.bind('/ccFastHeal', toggleFastHeal)
 mq.bind('/ccCompleteHeal', toggleCompleteHeal)
 mq.bind('/ccGroupHeal', toggleGroupHeal)
 mq.bind('/ccCures', toggleUseCures)
+mq.bind('/ccBuffGroup', setBuffGroup)
+mq.bind('/ccBuffRaid', setBuffRaid)
 mq.bind('/ccAegis', toggleAchpBuff)
 mq.bind('/ccSymbol', toggleHpOnlyBuff)
 mq.bind('/ccShield', toggleAcOnlyBuff)

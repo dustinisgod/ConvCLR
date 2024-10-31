@@ -62,6 +62,15 @@ end
 
 -- Define setChaseTargetAndDistance within nav
 function nav.setChaseTargetAndDistance(targetName, distance)
+
+    if targetName and targetName ~= "" then
+        -- Remove spaces, numbers, and symbols
+        targetName = targetName:gsub("[^%a]", "")
+        
+        -- Capitalize the first letter and make the rest lowercase
+        targetName = targetName:sub(1, 1):upper() .. targetName:sub(2):lower()
+    end
+    
     if targetName == 'off' then
         gui.chaseTarget = ""
         gui.chaseOn = false  -- Uncheck Chase in the GUI
