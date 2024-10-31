@@ -103,12 +103,19 @@ function utils.monitorBuffs()
 end
 
 function utils.sitMed()
-    if gui.botOn and gui.sitMed and mq.TLO.Me.PctMana() < 100 and mq.TLO.Me.PctHPs() > 90 then
-        if not mq.TLO.Me.Casting() and not mq.TLO.Me.Moving() and not mq.TLO.Me.Mount() then
-            if not mq.TLO.Me.Sitting() then
-                mq.delay(3000)
-                mq.cmd('/sit')
-                mq.delay(100)
+    if gui.botOn and gui.sitMed and mq.TLO.Me.PctMana() < 100 and not mq.TLO.Me.Mount() then
+        local nearbyNPCs = mq.TLO.SpawnCount(string.format('npc radius %d', gui.assistRange))()
+
+        if mq.TLO.Me.PctHPs() < gui.mainHealPct and nearbyNPCs > 0 then
+            return
+        end
+
+        if nearbyNPCs == 0 or (mq.TLO.Me.PctHPs() >= gui.mainHealPct) then
+            if not mq.TLO.Me.Casting() and not mq.TLO.Me.Moving() then
+                if not mq.TLO.Me.Sitting() then
+                    mq.cmd('/sit')
+                    mq.delay(100)
+                end
             end
         end
     end
