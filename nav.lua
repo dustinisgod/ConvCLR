@@ -16,6 +16,11 @@ function nav.setCamp()
     print(string.format("Camp location set at your current position in zone %s.", campLocation.zone))
 end
 
+function nav.clearCamp()
+    campLocation = nil
+    print("Camp location cleared.")
+end
+
 -- Function to check distance from camp and return if out of range
 function nav.checkCampDistance()
     if gui.returnToCamp and campLocation then

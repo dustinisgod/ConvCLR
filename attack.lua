@@ -32,7 +32,8 @@ end
 local function castOnTarget(targetID, targetName, spellName)
     -- Ensure we are targeting the right ID
     if targetID ~= mq.TLO.Target.ID() then
-        mq.cmdf('/target id %d', targetID)
+        mq.cmdf('/tar id %d', targetID)
+        print("test3")
         mq.delay(200)
     end
 
@@ -52,8 +53,13 @@ local function castOnTarget(targetID, targetName, spellName)
 end
 
 function attack.attackRoutine()
-    -- Ensure bot is active and the useKarn option is enabled
+    -- Ensure bot is active, useKarn is enabled, and mainAssist is in zone
     if not gui.botOn or not gui.useKarn then
+        return
+    end
+
+    -- Check if mainAssist is in the same zone
+    if not mq.TLO.Spawn(gui.mainAssist)() then
         return
     end
 
@@ -70,7 +76,8 @@ function attack.attackRoutine()
     if not bestAttackSpell then
         return
     end
-        -- Load the resurrection spell if it is not already loaded in Gem 8
+
+    -- Load the resurrection spell if it is not already loaded in Gem 8
     if tostring(mq.TLO.Me.Gem(8)) ~= bestAttackSpell and gui.useKarn then
         clericspells.loadAndMemorizeSpell("ReverseDS", charLevel, 8)
     end
@@ -90,7 +97,6 @@ function attack.attackRoutine()
             end
         end
     end
-    
 end
 
 return attack

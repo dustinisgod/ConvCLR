@@ -7,7 +7,7 @@ local utils = require('utils')
 local res = {}
 res.resQueue = {}
 
--- Configuration
+local inRaid, inGroup = mq.TLO.Raid.Members() > 0, mq.TLO.Me.Grouped()
 local resurrectionDistance = 5  -- Final distance to attempt resurrection
 local dragDistance = 100         -- Distance to start dragging corpses towards us
 local resCooldown = {}  -- Track corpses on cooldown
@@ -182,8 +182,18 @@ local function processResurrectionQueue()
                             end
                         end
 
-                        mq.cmdf('/target id %d', corpse.ID())
+                        local nearbyCorpses = mq.TLO.SpawnCount('pccorpse radius ' .. dragDistance)()
+                        if nearbyCorpses == 0 then
+                            return
+                        end
+
+                        if not corpse and not isCorpseEligibleForResurrection(corpse, inRaid, inGroup) then
+                            return
+                        end
+                        
+                        mq.cmdf('/tar id %d', corpse.ID())
                         mq.delay(200)
+                        print("test4")
 
                         if mq.TLO.Target() and mq.TLO.Target.CleanName() == corpseName then
                             -- Retry loop for dragging the corpse
@@ -279,7 +289,6 @@ function res.resRoutine()
             return
         end
 
-        local inRaid, inGroup = mq.TLO.Raid.Members() > 0, mq.TLO.Me.Grouped()
         local bestResSpell = clericspells.findBestSpell("Resurrection", clericLevel)
 
         if not gui.useEpic then
@@ -349,7 +358,8 @@ function res.manualResurrection(playerName)
     local corpse = mq.TLO.NearestSpawn('pccorpse "' .. corpseName .. '"')
     if corpse and corpse.ID() then
         -- Target the corpse by ID and confirm in range
-        mq.cmdf('/target id %d', corpse.ID())
+        mq.cmdf('/tar id %d', corpse.ID())
+        print("test5")
         mq.delay(200)
 
         local targetName = mq.TLO.Target.CleanName() or "nil"

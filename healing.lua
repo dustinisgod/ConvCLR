@@ -62,13 +62,17 @@ end
 local function castSpell(targetID, targetName, spellName)
     mq.cmdf('/dgtell ALL %s - Casting %s on %s', clericName, spellName, targetName)
     mq.cmdf('/tar ID %s', targetID)
+    print("test1")
     mq.delay(200)
     if targetID ~= mq.TLO.Target.ID() then
         mq.cmdf('/tar ID %s', targetID)
+        print("test2")
         mq.delay(200)
     end
+
     mq.cmdf('/cast %s', spellName)
-    mq.cmdf('/cast %s', spellName)
+    mq.delay(100)
+
     while mq.TLO.Me.Casting() do
         if gui.stopCast then
             if mq.TLO.Target() and mq.TLO.Target.PctHPs() >= 95 then

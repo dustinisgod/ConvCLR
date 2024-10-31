@@ -94,7 +94,7 @@ function utils.monitorBuffs()
                 buffer.buffRoutine()
 
                 -- Set lastBuffTime to the current time + random interval
-                local randomDelay = math.random(240, 360)  -- Random delay between 240 and 360 seconds
+                local randomDelay = math.random(240, 600)  -- Random delay between 240 and 360 seconds
                 lastBuffTime = currentTime + randomDelay
             end
         end
@@ -122,9 +122,12 @@ end
 
 local lastNavTime = 0
 
+local campSet = false  -- Track if camp is set
+
 function utils.monitorNav()
+
+    -- Additional camp distance or chase check if bot is on
     if gui.botOn then
-        local res = require('res')
         if not gui then
             printf("Error: gui is nil")
             return
@@ -132,15 +135,17 @@ function utils.monitorNav()
 
         local currentTime = os.time()
 
-        if (gui.returnToCamp == true ) and (currentTime - lastNavTime >= 5) then
+        if gui.returntocamp and (currentTime - lastNavTime >= 5) then
             nav.checkCampDistance()
             lastNavTime = currentTime
-        elseif
-            (gui.chaseOn == true ) then
+        elseif gui.chaseOn then
             nav.chase()
         end
     end
 end
+
+
+local lastAttackTime = 0
 
 function utils.monitorAttack()
     if gui.botOn then
@@ -149,8 +154,13 @@ function utils.monitorAttack()
             return
         end
 
-        if gui.useKarn  then
+        local currentTime = os.time()
+
+        if gui.useKarn and currentTime >= lastAttackTime then
             attack.attackRoutine()
+
+        local randomDelay = math.random(1, 5)
+        lastAttackTime = currentTime + randomDelay
         end
     end
 end

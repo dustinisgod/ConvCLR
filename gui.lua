@@ -48,7 +48,7 @@ local function setDefaultConfig()
     gui.chaseOn = false
     gui.chaseTarget = ""
     gui.chaseDistance = 20
-
+    
     -- Extended Target Defaults for Healing
     for i = 1, 5 do
         gui["ExtTargetMainHeal" .. i] = false

@@ -5,6 +5,7 @@ local gui = require('gui')
 local clericspells = require('clericspells')
 local healing = require('healing')
 local res = require('res')
+local nav = require('nav')
 
 local currentLevel = mq.TLO.Me.Level()
 
@@ -37,7 +38,28 @@ local function checkBotOn(currentLevel)
     end
 end
 
+
+-- Persistent toggle state to track changes in gui.botOn
+local toggleboton = gui.botOn or false
+
+local function returnChaseToggle()
+    if gui.botOn and gui.returnToCamp and not toggleboton then
+        -- Run setCamp only once when gui.botOn is checked
+        nav.setCamp()
+        toggleboton = true
+    elseif not gui.botOn and toggleboton then
+        -- Run clearCamp only once when gui.botOn is unchecked
+        nav.clearCamp()
+        toggleboton = false
+    end
+end
+
+
+
+
 while gui.clericControlGUI do
+
+    returnChaseToggle()
 
     if gui.botOn then
 

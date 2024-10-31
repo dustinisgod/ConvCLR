@@ -36,7 +36,14 @@ local function handleHealRoutineAndReturn()
     return true
 end
 
--- Buffing routine including self-buffing for the cleric
+-- Helper function to shuffle a table
+local function shuffleTable(t)
+    for i = #t, 2, -1 do
+        local j = math.random(1, i)
+        t[i], t[j] = t[j], t[i]
+    end
+end
+
 function buffer.buffRoutine()
     if not gui.botOn then return end
 
@@ -113,8 +120,25 @@ function buffer.buffRoutine()
                     return
                 end
 
-                mq.cmdf("/target id %d", memberID)
-                mq.delay(500)
+                if mq.TLO.Me.PctMana() < 20 then
+                    utils.sitMed()
+                    return
+                end
+
+                -- Target member with retry and verification
+                local maxTargetAttempts = 3
+                local attempt = 0
+                repeat
+                    mq.cmdf("/tar id %d", memberID)
+                    mq.delay(500)
+                    attempt = attempt + 1
+                until mq.TLO.Target.ID() == memberID or attempt >= maxTargetAttempts
+
+                -- Skip if targeting failed
+                if mq.TLO.Target.ID() ~= memberID then
+                    print(string.format("Warning: Unable to target member ID %d after %d attempts.", memberID, maxTargetAttempts))
+                    break
+                end
 
                 if not mq.TLO.Target.Dead() and not mq.TLO.Target.Buff(bestSpell)() and mq.TLO.Spell(bestSpell).StacksTarget() then
                     table.insert(buffer.buffQueue, {memberID = memberID, spell = bestSpell, spellType = spellType, slot = (spellType == "BuffACHP" and 6 or (spellType == "BuffHPOnly" and 7 or 8))})
@@ -123,6 +147,9 @@ function buffer.buffRoutine()
 
             -- Load and memorize the spell only if there are members needing the buff
             if #buffer.buffQueue > 0 then
+                -- Shuffle the buff queue to randomize member order
+                shuffleTable(buffer.buffQueue)
+                
                 clericspells.loadAndMemorizeSpell(spellType, clericLevel, buffer.buffQueue[1].slot)
                 buffer.processBuffQueue()
             end
@@ -136,10 +163,16 @@ function buffer.processBuffQueue()
             return
         end
 
+        if mq.TLO.Me.PctMana() < 20 then
+            utils.sitMed()
+            return
+        end
+
         local buffTask = table.remove(buffer.buffQueue, 1)
         local maxReadyAttempts = 20
         local readyAttempt = 0
 
+        -- Ensure spell is ready before proceeding
         while not mq.TLO.Me.SpellReady(buffTask.spell)() and readyAttempt < maxReadyAttempts do
             if not gui.botOn then return end
             readyAttempt = readyAttempt + 1
@@ -155,9 +188,11 @@ function buffer.processBuffQueue()
             break
         end
 
-        mq.cmdf('/target id %d', buffTask.memberID)
-        mq.delay(200)
+        mq.cmdf('/tar id %d', buffTask.memberID)
+        print("test8")
+        mq.delay(500, function() return mq.TLO.Target.ID() == buffTask.memberID end)
 
+        -- Check if target already has the buff
         if mq.TLO.Target.Buff(buffTask.spell)() then
             break
         end
@@ -172,19 +207,20 @@ function buffer.processBuffQueue()
         end
 
         mq.cmdf('/cast %d', buffTask.slot)
-        mq.delay(200)
+        mq.delay(500)  -- Allow time for casting to start
 
+        -- Wait for casting to complete, or stop if conditions are met
         while mq.TLO.Me.Casting() do
-            if not gui.botOn then
+            if mq.TLO.Target.Buff(buffTask.spell)() or not gui.botOn then
                 mq.cmd('/stopcast')
-                return
+                break
             end
             mq.delay(50)
         end
 
-        mq.delay(100)
-
-        if not mq.TLO.Spawn(buffTask.memberID).Buff(buffTask.spell)() then
+        -- Verify if the buff was applied, and re-queue if not
+        mq.delay(300)  -- Extra delay to allow the buff to register
+        if not mq.TLO.Target.Buff(buffTask.spell)() then
             table.insert(buffer.buffQueue, buffTask)
         end
 
