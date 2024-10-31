@@ -189,7 +189,6 @@ function buffer.processBuffQueue()
         end
 
         mq.cmdf('/tar id %d', buffTask.memberID)
-        print("test8")
         mq.delay(500, function() return mq.TLO.Target.ID() == buffTask.memberID end)
 
         -- Check if target already has the buff

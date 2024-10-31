@@ -190,10 +190,9 @@ local function processResurrectionQueue()
                         if not corpse and not isCorpseEligibleForResurrection(corpse, inRaid, inGroup) then
                             return
                         end
-                        
+
                         mq.cmdf('/tar id %d', corpse.ID())
                         mq.delay(200)
-                        print("test4")
 
                         if mq.TLO.Target() and mq.TLO.Target.CleanName() == corpseName then
                             -- Retry loop for dragging the corpse
@@ -359,7 +358,6 @@ function res.manualResurrection(playerName)
     if corpse and corpse.ID() then
         -- Target the corpse by ID and confirm in range
         mq.cmdf('/tar id %d', corpse.ID())
-        print("test5")
         mq.delay(200)
 
         local targetName = mq.TLO.Target.CleanName() or "nil"

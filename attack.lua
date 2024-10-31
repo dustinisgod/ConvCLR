@@ -33,7 +33,6 @@ local function castOnTarget(targetID, targetName, spellName)
     -- Ensure we are targeting the right ID
     if targetID ~= mq.TLO.Target.ID() then
         mq.cmdf('/tar id %d', targetID)
-        print("test3")
         mq.delay(200)
     end
 

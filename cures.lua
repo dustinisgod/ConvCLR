@@ -68,8 +68,7 @@ local function queueAfflictedMembers()
 
         -- Target the member and check for poison or disease afflictions
         mq.cmdf('/tar id %s', memberID)
-        print("test6")
-        mq.delay(100)
+        mq.delay(200)
 
         -- Only add to cureQueue if cleric meets the required level for each affliction
         if mq.TLO.Target.Poisoned() and clericLevel >= 22 then
@@ -90,7 +89,6 @@ local function queueAfflictedMembers()
             -- Only check if valid and not a group member
             if extID and not isGroupMember(extID) then
                 mq.cmdf('/tar id %s', extID)
-                print("test7")
                 mq.delay(200)
 
                 -- Only add to cureQueue if cleric meets the required level for each affliction
