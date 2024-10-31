@@ -1,6 +1,6 @@
 # Convergence Cleric Bot Command Guide
 
-### Exit Bot
+### Start Script
 - **Command:** `/lua run convcleric`
 - **Description:** Starts the Lua script Convergence Cleric.
 
