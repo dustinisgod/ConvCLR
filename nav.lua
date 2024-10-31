@@ -5,15 +5,26 @@ local nav = {}
 
 local campLocation = nil
 
--- Function to set the camp location
+-- Function to set the camp location with zone information
 function nav.setCamp()
-    campLocation = { x = mq.TLO.Me.X(), y = mq.TLO.Me.Y(), z = mq.TLO.Me.Z() }
-    print("Camp location set at your current position.")
+    campLocation = {
+        x = mq.TLO.Me.X(),
+        y = mq.TLO.Me.Y(),
+        z = mq.TLO.Me.Z(),
+        zone = mq.TLO.Zone.ShortName()
+    }
+    print(string.format("Camp location set at your current position in zone %s.", campLocation.zone))
 end
 
 -- Function to check distance from camp and return if out of range
 function nav.checkCampDistance()
     if gui.returnToCamp and campLocation then
+        -- Check if the character is in the same zone as the camp location
+        if mq.TLO.Zone.ShortName() ~= campLocation.zone then
+            print("Current zone does not match camp zone. Aborting return to camp.")
+            return
+        end
+
         -- Retrieve current position
         local currentX = mq.TLO.Me.X()
         local currentY = mq.TLO.Me.Y()
@@ -41,7 +52,6 @@ function nav.checkCampDistance()
         end        
     end
 end
-
 
 -- Function to follow a designated member within a specified distance
 function nav.chase()
