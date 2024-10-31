@@ -25,8 +25,22 @@ These commands control general bot functionality, allowing you to start, stop, o
 
 ---
 
-## Healing and Buffing Commands
-These commands control various healing modes and buff options.
+### Set Main Assist
+- **Command:** `/ccMainAssist`
+- **Description:** Sets the main assist for the bot to follow in assisting with attacks.
+
+### Set Assist Range
+- **Command:** `/ccAssistRange <value>`
+- **Description:** Specifies the distance within which the bot will assist the main assist's target.
+
+### Set Assist Percent
+- **Command:** `/ccAssistPercent <value>`
+- **Description:** Sets the health percentage of the target at which the bot will begin assisting.
+
+---
+
+## Healing
+These commands control various healing modes.
 
 ### Toggle Main Heal
 - **Command:** `/ccMainHeal`
@@ -51,6 +65,24 @@ These commands control various healing modes and buff options.
 ### Toggle Cure Usage
 - **Command:** `/ccCures`
 - **Description:** Enables or disables the use of cures during combat.
+
+---
+
+## Group or Raid Buff Control
+These commands control who you want to buff.
+
+### Set Buff Group
+- **Command:** `/ccBuffGroup`
+- **Description:** Enables or disables group buffing for the current group members.
+
+### Set Buff Raid
+- **Command:** `/ccBuffRaid`
+- **Description:** Enables or disables raid-wide buffing for all raid members.
+
+---
+
+## Buff Commands
+These commands control different HP & AC Buffs.
 
 ### Toggle Aegis Buff
 - **Command:** `/ccAegis`
@@ -189,7 +221,8 @@ Commands to control navigation settings and camping behavior.
 ### Set Chase Target and Distance
 - **Command:** `/ccChase`
 - **Description:** Sets a target and distance for the bot to chase.
-- **Usage:** Type `/ccChase <target> <distance>`.
+- **Usage:** Type `/ccChase <target> <distance>` or `/ccChase off`.
 - **Example:** `/ccChase John 30` will set the character John as the chase at a distance of 30.
+- **Example:** `/ccChase off` will turn chasing off.
 
 ---
