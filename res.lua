@@ -112,6 +112,7 @@ end
 -- Function to handle the heal routine and return
 local function handleHealRoutineAndReturn()
     healing.healRoutine()
+    utils.monitorNav()
     return true -- Assuming heal routine passes, return to continue buffing
 end
 
