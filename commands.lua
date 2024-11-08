@@ -6,148 +6,54 @@ local utils = require 'utils'
 
 local commands = {}
 
+-- Helper function to set on/off values for toggleable options
+local function setToggleOption(option, value, name)
+    if value == "on" then
+        gui[option] = true
+        print(name .. " is now enabled.")
+    elseif value == "off" then
+        gui[option] = false
+        print(name .. " is now disabled.")
+    else
+        print("Usage: /convCLR " .. option .. " on/off")
+    end
+end
+
 local function toggleExit()
     print("Closing..")
     gui.isOpen = false
-end
-
-local function setBotOn()
-    gui.botOn = true
-    print("Bot is now enabled")
-end
-
-local function setBotOff()
-    gui.botOn = false
-    print("Bot is now disabled.")
 end
 
 local function setSave()
     gui.saveConfig()
 end
 
-local function setAssistRange(value)
-    gui.assistRange = tonumber(value) or gui.assistRange
-    print("Assist Range set to ", gui.assistRange)
-end
+-- Function definitions with on/off control
+local function setBotOnOff(value) setToggleOption("botOn", value, "Bot") end
+local function setMainHeal(value) setToggleOption("mainHeal", value, "Normal Heal") end
+local function setUseHoT(value) setToggleOption("useHoT", value, "HoT") end
+local function setFastHeal(value) setToggleOption("fastHeal", value, "Fast Heal") end
+local function setCompleteHeal(value) setToggleOption("completeHeal", value, "Complete Heal") end
+local function setGroupHeal(value) setToggleOption("groupHeal", value, "Group Heal") end
+local function setUseCures(value) setToggleOption("useCures", value, "Use Cures") end
+local function setBuffGroup(value) setToggleOption("buffGroup", value, "Buff Group") end
+local function setBuffRaid(value) setToggleOption("buffRaid", value, "Buff Raid") end
+local function setAchpBuff(value) setToggleOption("achpBuff", value, "Aegis") end
+local function setHpOnlyBuff(value) setToggleOption("hpOnlyBuff", value, "Symbol") end
+local function setAcOnlyBuff(value) setToggleOption("acOnlyBuff", value, "Shield") end
+local function setResistMagic(value) setToggleOption("resistMagic", value, "Resist Magic") end
+local function setResistFire(value) setToggleOption("resistFire", value, "Resist Fire") end
+local function setResistCold(value) setToggleOption("resistCold", value, "Resist Cold") end
+local function setResistDisease(value) setToggleOption("resistDisease", value, "Resist Disease") end
+local function setResistPoison(value) setToggleOption("resistPoison", value, "Resist Poison") end
+local function setResOn(value) setToggleOption("useRes", value, "Resurrection") end
+local function setUseEpic(value) setToggleOption("useEpic", value, "Use Epic") end
+local function setCombatRes(value) setToggleOption("combatRes", value, "Combat Res") end
+local function setSitMed(value) setToggleOption("sitMed", value, "Sit Med") end
+local function setKarn(value) setToggleOption("useKarn", value, "Mark of Karn") end
 
-local function setAssistPercent(value)
-    gui.assistPercent = tonumber(value) or gui.assistPercent
-    print("Assist Percent set to ", gui.assistPercent)
-end
-
-local function togglemainheal() 
-    gui.mainheal = not gui.mainheal 
-    print("Normal Heal is now", gui.mainheal and "enabled" or "disabled")
-end
-
-local function toggleUseHoT() 
-    gui.useHoT = not gui.useHoT 
-    print("HoT is now", gui.useHoT and "enabled" or "disabled")
-end
-
-local function toggleFastHeal() 
-    gui.fastHeal = not gui.fastHeal 
-    print("Fast Heal is now", gui.fastHeal and "enabled" or "disabled")
-end
-
-local function toggleCompleteHeal() 
-    gui.completeHeal = not gui.completeHeal 
-    print("Complete Heal is now", gui.completeHeal and "enabled" or "disabled")
-end
-
-local function toggleGroupHeal() 
-    gui.groupHeal = not gui.groupHeal 
-    print("Group Heal is now", gui.groupHeal and "enabled" or "disabled")
-end
-
-local function toggleUseCures() 
-    gui.useCures = not gui.useCures 
-    print("Use Cures is now", gui.useCures and "enabled" or "disabled")
-end
-
-local function setBuffGroup()
-    gui.buffGroup = true
-    print("Buffing group is now enabled.")
-end
-
-local function setBuffRaid()
-    gui.buffRaid = true
-    print("Buffing raid is now enabled.")
-end
-
-local function toggleAchpBuff() 
-    gui.achpBuff = not gui.achpBuff 
-    print("Aegis is now", gui.achpBuff and "enabled" or "disabled")
-end
-
-local function toggleHpOnlyBuff() 
-    gui.hpOnlyBuff = not gui.hpOnlyBuff 
-    print("Symbol is now", gui.hpOnlyBuff and "enabled" or "disabled")
-end
-
-local function toggleAcOnlyBuff() 
-    gui.acOnlyBuff = not gui.acOnlyBuff 
-    print("Shield is now", gui.acOnlyBuff and "enabled" or "disabled")
-end
-
-local function toggleResistMagic() 
-    gui.resistMagic = not gui.resistMagic 
-    print("Resist Magic is now", gui.resistMagic and "enabled" or "disabled")
-end
-
-local function toggleResistFire() 
-    gui.resistFire = not gui.resistFire 
-    print("Resist Fire is now", gui.resistFire and "enabled" or "disabled")
-end
-
-local function toggleResistCold() 
-    gui.resistCold = not gui.resistCold 
-    print("Resist Cold is now", gui.resistCold and "enabled" or "disabled")
-end
-
-local function toggleResistDisease() 
-    gui.resistDisease = not gui.resistDisease 
-    print("Resist Disease is now", gui.resistDisease and "enabled" or "disabled")
-end
-
-local function toggleResistPoison() 
-    gui.resistPoison = not gui.resistPoison 
-    print("Resist Poison is now", gui.resistPoison and "enabled" or "disabled")
-end
-
-local function setResOn()
-    gui.useRes = true
-    print("Res's are now enabled.")
-end
-
-local function setResOff()
-    gui.useRes = false
-    print("Res's are now disabled.")
-    
-end
-
-local function toggleUseEpic() 
-    gui.useEpic = not gui.useEpic 
-    print("Use Epic is now", gui.useEpic and "enabled" or "disabled")
-end
-
-local function toggleCombatRes() 
-    gui.combatRes = not gui.combatRes 
-    print("Combat Res is now", gui.combatRes and "enabled" or "disabled")
-end
-
-local function toggleSitMed() 
-    gui.sitMed = not gui.sitMed 
-    print("Sit Med is now", gui.sitMed and "enabled" or "disabled")
-end
-
-local function toggleKarn()
-    gui.useKarn = not gui.useKarn
-    print("Using Mark of Karn is now", gui.useKarn and "enabled" or "disabled")
-end
-
--- Set functions for sliders
-local function setmainhealPct(value)
+-- Functions for setting slider values
+local function setMainHealPct(value)
     gui.mainhealPct = tonumber(value) or gui.mainhealPct
     print("Normal Heal % Threshold set to", gui.mainhealPct)
 end
@@ -177,75 +83,185 @@ local function setGroupHealNumber(value)
     print("Group Members to Heal set to", gui.groupHealNumber)
 end
 
-local function setCamp()
-    gui.campLocation = nav.setCamp()
+-- Combined function for setting main assist, range, and percent
+local function setAssist(name, range, percent)
+    if name then
+        utils.setMainAssist(name)
+        print("Main Assist set to", name)
+    else
+        print("Error: Main Assist name is required.")
+        return
+    end
+
+    -- Set the assist range if provided
+    if range and string.match(range, "^%d+$") then
+        gui.assistRange = tonumber(range)
+        print("Assist Range set to", gui.assistRange)
+    else
+        print("Assist Range not provided or invalid. Current range:", gui.assistRange)
+    end
+
+    -- Set the assist percent if provided
+    if percent and string.match(percent, "^%d+$") then
+        gui.assistPercent = tonumber(percent)
+        print("Assist Percent set to", gui.assistPercent)
+    else
+        print("Assist Percent not provided or invalid. Current percent:", gui.assistPercent)
+    end
 end
 
-local function setReturnToCampOn()
-    gui.returnToCamp = true
-    gui.chaseOn = false
-    print("Return to camp is now enabled.")
+local function setChaseOnOff(value)
+    if value == "" then
+        print("Usage: /convbard Chase <targetName> <distance> or /convbard Chase off/on")
+    elseif value == 'on' then
+        gui.chaseOn = true
+        gui.returnToCamp = false
+        gui.pullOn = false
+        print("Chase enabled.")
+    elseif value == 'off' then
+        gui.chaseOn = false
+        print("Chase disabled.")
+    else
+        -- Split value into targetName and distance
+        local targetName, distanceStr = value:match("^(%S+)%s*(%S*)$")
+        
+        if not targetName then
+            print("Invalid input. Usage: /convbard Chase <targetName> <distance>")
+            return
+        end
+        
+        -- Convert distance to a number, if it's provided
+        local distance = tonumber(distanceStr)
+        
+        -- Check if distance is valid
+        if not distance then
+            print("Invalid distance provided. Usage: /ConvBard Chase <targetName> <distance> or /ConvBard Chase off")
+            return
+        end
+        
+        -- Pass targetName and valid distance to setChaseTargetAndDistance
+        nav.setChaseTargetAndDistance(targetName, distance)
+    end
 end
 
-local function setReturnToCampOff()
-    gui.returnToCamp = false
-    print("Return to camp is now disabled.")
+-- Combined function for setting camp, return to camp, and chase
+local function setCampHere(value1)
+    if value1 == "on" then
+        gui.chaseOn = false
+        gui.campLocation = nav.setCamp()
+        gui.returnToCamp = true
+        gui.campDistance = gui.campDistance or 10
+        print("Camp location set to current spot. Return to Camp enabled with default distance:", gui.campDistance)
+    elseif value1 == "off" then
+        -- Disable return to camp
+        gui.returnToCamp = false
+        print("Return To Camp disabled.")
+    elseif tonumber(value1) then
+        gui.chaseOn = false
+        gui.campLocation = nav.setCamp()
+        gui.returnToCamp = true
+        gui.campDistance = tonumber(value1)
+        print("Camp location set with distance:", gui.campDistance)
+    else
+        print("Error: Invalid command. Usage: /convbard camphere <distance>, /convbard camphere on, /convbard camphere off")
+    end
 end
 
-local function setCampDistance(value)
-    gui.campDistance = tonumber(value) or gui.campDistance
-    print("Camp distance set to", gui.campDistance)
+-- Define the command handler function
+local function commandHandler(command, ...)
+    -- Convert command to lowercase for case-insensitive matching
+    command = string.lower(command)
+    local args = {...}
+    
+    -- Command processing with case matching for each command
+    if command == "exit" then
+        toggleExit()
+    elseif command == "bot" then
+        setBotOnOff(args[1])
+    elseif command == "save" then
+        setSave()
+    elseif command == "assist" then
+        setAssist(args[1], args[2], args[3])
+
+    -- Toggleable Commands
+    elseif command == "mainheal" then
+        setMainHeal(args[1])
+    elseif command == "hot" then
+        setUseHoT(args[1])
+    elseif command == "fastheal" then
+        setFastHeal(args[1])
+    elseif command == "ch" then
+        setCompleteHeal(args[1])
+    elseif command == "groupheal" then
+        setGroupHeal(args[1])
+    elseif command == "cures" then
+        setUseCures(args[1])
+    elseif command == "buffgroup" then
+        setBuffGroup(args[1])
+    elseif command == "buffraid" then
+        setBuffRaid(args[1])
+    elseif command == "aegis" then
+        setAchpBuff(args[1])
+    elseif command == "symbol" then
+        setHpOnlyBuff(args[1])
+    elseif command == "shield" then
+        setAcOnlyBuff(args[1])
+    elseif command == "buffmagic" then
+        setResistMagic(args[1])
+    elseif command == "bufffire" then
+        setResistFire(args[1])
+    elseif command == "buffcold" then
+        setResistCold(args[1])
+    elseif command == "buffdisease" then
+        setResistDisease(args[1])
+    elseif command == "buffpoison" then
+        setResistPoison(args[1])
+    elseif command == "rez" then
+        setResOn(args[1])  -- Now takes on/off
+    elseif command == "epic" then
+        setUseEpic(args[1])
+    elseif command == "combatres" then
+        setCombatRes(args[1])
+    elseif command == "sitmed" then
+        setSitMed(args[1])
+    elseif command == "karn" then
+        setKarn(args[1])
+
+    -- Slider Commands
+    elseif command == "mainhealpct" then
+        setMainHealPct(args[1])
+    elseif command == "hotpct" then
+        setHotPct(args[1])
+    elseif command == "fasthealpct" then
+        setFastHealPct(args[1])
+    elseif command == "completehealpct" then
+        setCompleteHealPct(args[1])
+    elseif command == "grouphealpct" then
+        setGroupHealPct(args[1])
+    elseif command == "grouphealnumber" then
+        setGroupHealNumber(args[1])
+
+    -- Nav Commands
+elseif command == "camphere" then
+    setCampHere(args[1])
+elseif command == "chase" then
+    local chaseValue = args[1]
+    if args[2] then
+        chaseValue = chaseValue .. " " .. args[2]
+    end
+    setChaseOnOff(chaseValue)
+
+    else
+        print("Error: Unknown command.")
+    end
 end
 
-
+-- Initialize command bindings
 function commands.init()
-
-mq.bind('/ccExit', toggleExit)
-mq.bind('/ccOn', setBotOn)
-mq.bind('/ccOff', setBotOff)
-mq.bind('/ccSave', setSave)
-mq.bind('/ccMainAssist', utils.setMainAssist)
-mq.bind('/ccAssistRange', setAssistRange)
-mq.bind('/ccAssistPercent', setAssistPercent)
-mq.bind('/ccMainHeal', togglemainheal)
-mq.bind('/ccHoT', toggleUseHoT)
-mq.bind('/ccFastHeal', toggleFastHeal)
-mq.bind('/ccCompleteHeal', toggleCompleteHeal)
-mq.bind('/ccGroupHeal', toggleGroupHeal)
-mq.bind('/ccCures', toggleUseCures)
-mq.bind('/ccBuffGroup', setBuffGroup)
-mq.bind('/ccBuffRaid', setBuffRaid)
-mq.bind('/ccAegis', toggleAchpBuff)
-mq.bind('/ccSymbol', toggleHpOnlyBuff)
-mq.bind('/ccShield', toggleAcOnlyBuff)
-mq.bind('/ccResistMagic', toggleResistMagic)
-mq.bind('/ccResistFire', toggleResistFire)
-mq.bind('/ccResistCold', toggleResistCold)
-mq.bind('/ccResistDisease', toggleResistDisease)
-mq.bind('/ccResistPoison', toggleResistPoison)
-mq.bind('/ccResOn', setResOn)
-mq.bind('/ccResOff', setResOff)
-mq.bind('/ccEpic', toggleUseEpic)
-mq.bind('/ccCombatRes', toggleCombatRes)
-mq.bind('/ccResCorpse', res.manualResurrection)
-mq.bind('/ccSitMed', toggleSitMed)
-mq.bind('/ccKarn', toggleKarn)
-
--- Register binds for sliders (requires a value parameter)
-mq.bind('/ccMainHealPct', setmainhealPct)
-mq.bind('/ccHotPct', setHotPct)
-mq.bind('/ccFastHealPct', setFastHealPct)
-mq.bind('/ccCompleteHealPct', setCompleteHealPct)
-mq.bind('/ccGroupHealPct', setGroupHealPct)
-mq.bind('/ccGroupHealNumber', setGroupHealNumber)
-
--- Nav binds
-mq.bind('/ccCampHere', setCamp)
-mq.bind('/ccReturnOn', setReturnToCampOn)
-mq.bind('/ccReturnOff', setReturnToCampOff)
-mq.bind('/ccCampDistance', setCampDistance)
-mq.bind('/ccChase', nav.setChaseTargetAndDistance)
-
+    -- Bind all commands to the handler
+    mq.bind('/convclr', function(command, ...)
+        commandHandler(command, ...)
+    end)
 end
 
 return commands

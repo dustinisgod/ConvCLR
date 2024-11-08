@@ -48,6 +48,7 @@ local function setDefaultConfig()
     gui.chaseOn = false
     gui.chaseTarget = ""
     gui.chaseDistance = 20
+    gui.useKarn = false
     
     -- Extended Target Defaults for Healing
     for i = 1, 5 do
@@ -119,8 +120,11 @@ local function clericControlGUI()
         ImGui.SetNextItemWidth(100)
         gui.mainAssist = ImGui.InputText("Main Assist", gui.mainAssist)
         if gui.mainAssist ~= "" then
+            gui.assistMelee = ImGui.Checkbox("Melee", gui.assistMelee or false)
+            ImGui.SameLine()
             ImGui.SetNextItemWidth(100)
             gui.assistRange = ImGui.SliderInt("Assist Range", gui.assistRange, 5, 100)
+            ImGui.SameLine()
             ImGui.SetNextItemWidth(100)
             gui.assistPercent= ImGui.SliderInt("Assist %", gui.assistPercent, 5, 100)
         end
