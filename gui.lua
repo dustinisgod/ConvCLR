@@ -2,8 +2,8 @@ local mq = require('mq')
 local ImGui = require('ImGui')
 
 
-local clericName = mq.TLO.Me.Name()
-local configPath = mq.configDir .. '/' .. clericName .. '_config.lua'
+local charName = mq.TLO.Me.Name()
+local configPath = mq.configDir .. '/' .. 'ConvCLR_'.. charName .. '_config.lua'
 local config = {}
 
 local gui = {}
