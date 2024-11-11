@@ -7,6 +7,12 @@ local healing = require('healing')
 local res = require('res')
 local nav = require('nav')
 
+local class = mq.TLO.Me.Class()
+if class ~= "Cleric" then
+    print("This script is only for Clerics.")
+    mq.exit()
+end
+
 local currentLevel = mq.TLO.Me.Level()
 
 utils.PluginCheck()
