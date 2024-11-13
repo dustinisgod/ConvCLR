@@ -25,9 +25,6 @@ commands.init()
 
 mq.event('ConsentError', 'You do not have consent to summon that corpse.', res.consentErrorCallback)
 
-clericspells.startup(currentLevel)
-
-
 local startupRun = false
 
 -- Function to check the botOn status and run startup once
@@ -69,6 +66,8 @@ while gui.clericControlGUI do
 
     if gui.botOn then
 
+        checkBotOn(currentLevel)
+
         utils.monitorNav()
 
         healing.healRoutine()
@@ -82,8 +81,6 @@ while gui.clericControlGUI do
         utils.monitorBuffs()
 
         utils.monitorCures()
-
-        checkBotOn(currentLevel)
 
         local newLevel = mq.TLO.Me.Level()
         if newLevel ~= currentLevel then
