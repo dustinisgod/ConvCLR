@@ -46,11 +46,12 @@ local function setResistFire(value) setToggleOption("resistFire", value, "Resist
 local function setResistCold(value) setToggleOption("resistCold", value, "Resist Cold") end
 local function setResistDisease(value) setToggleOption("resistDisease", value, "Resist Disease") end
 local function setResistPoison(value) setToggleOption("resistPoison", value, "Resist Poison") end
-local function setResOn(value) setToggleOption("useRes", value, "Resurrection") end
+local function setResOn(value) setToggleOption("useRez", value, "Resurrection") end
 local function setUseEpic(value) setToggleOption("useEpic", value, "Use Epic") end
-local function setCombatRes(value) setToggleOption("combatRes", value, "Combat Res") end
+local function setcombatRez(value) setToggleOption("combatRez", value, "Combat Res") end
 local function setSitMed(value) setToggleOption("sitMed", value, "Sit Med") end
 local function setKarn(value) setToggleOption("useKarn", value, "Mark of Karn") end
+local function setStopCast(value) setToggleOption("stopCast", value, "Stop Cast") end
 
 -- Functions for setting slider values
 local function setMainHealPct(value)
@@ -220,10 +221,12 @@ local function commandHandler(command, ...)
         setResOn(args[1])  -- Now takes on/off
     elseif command == "epic" then
         setUseEpic(args[1])
-    elseif command == "combatres" then
-        setCombatRes(args[1])
+    elseif command == "combatRez" then
+        setcombatRez(args[1])
     elseif command == "sitmed" then
         setSitMed(args[1])
+    elseif command == "stopcast" then
+        setStopCast(args[1])
     elseif command == "karn" then
         setKarn(args[1])
 
@@ -259,7 +262,14 @@ end
 -- Initialize command bindings
 function commands.init()
     -- Bind all commands to the handler
-    mq.bind('/convclr', function(command, ...)
+    mq.bind('/convCLR', function(command, ...)
+        commandHandler(command, ...)
+    end)
+end
+
+function commands.initALL()
+    -- Single binding for the /convBRD command
+    mq.bind('/convALL', function(command, ...)
         commandHandler(command, ...)
     end)
 end

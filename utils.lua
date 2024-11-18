@@ -60,7 +60,7 @@ function utils.monitorRes()
 
         local currentTime = os.time()
 
-        if (gui.useRes == true ) and (currentTime - lastResTime >= 10) then
+        if (gui.useRez == true ) and (currentTime - lastResTime >= 10) then
             if mq.TLO.Me.PctMana() > 20 then
                 res.resRoutine()
                 lastResTime = currentTime

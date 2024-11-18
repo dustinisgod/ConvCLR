@@ -22,6 +22,7 @@ mq.cmd("/plugin mq2cast load")
 mq.imgui.init('clericControlGUI', gui.clericControlGUI)
 
 commands.init()
+commands.initALL()
 
 mq.event('ConsentError', 'You do not have consent to summon that corpse.', res.consentErrorCallback)
 

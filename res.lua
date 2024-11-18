@@ -8,7 +8,7 @@ local res = {}
 res.resQueue = {}
 
 local inRaid, inGroup = mq.TLO.Raid.Members() > 0, mq.TLO.Me.Grouped()
-local resurrectionDistance = 5  -- Final distance to attempt resurrection
+local rezDistance = 5  -- Final distance to attempt rez
 local dragDistance = 100         -- Distance to start dragging corpses towards us
 local resCooldown = {}  -- Track corpses on cooldown
 local consentEvent = false  -- Flag to check if an event was processed
@@ -18,7 +18,7 @@ local clericLevel = mq.TLO.Me.Level()
 local function preCastChecks()
     if mq.TLO.Me.Moving() or mq.TLO.Me.Casting() then
         return false
-    elseif mq.TLO.Me.Combat() and not gui.combatRes then
+    elseif mq.TLO.Me.Combat() and not gui.combatRez then
         return false
     end
     return true
@@ -51,13 +51,13 @@ local function isTargetInRange(targetID, spellName)
     end
 end
 
--- Helper function to validate a corpse for resurrection
-local function validateCorpseForResurrection(corpse)
+-- Helper function to validate a corpse for rez
+local function validateCorpseForRez(corpse)
     return corpse and corpse.ID() and corpse.X() and corpse.Y()
 end
 
 -- Check if a corpse belongs to a group or raid member
-local function isCorpseEligibleForResurrection(corpse, inRaid, inGroup)
+local function isCorpseEligibleForRez(corpse, inRaid, inGroup)
     local corpseName = corpse.CleanName()
     local corpseSuffix = "'s corpse"
     
@@ -99,10 +99,10 @@ local function isOnCooldown(corpseName)
     return false
 end
 
--- Function to add a corpse to the resurrection queue, checks cooldown status
-local function queueResurrection(corpse, resSpell)
+-- Function to add a corpse to the rez queue, checks cooldown status
+local function queueRez(corpse, resSpell)
     local corpseName = corpse.CleanName()
-    if validateCorpseForResurrection(corpse) and not res.resQueue[corpse.ID()] and not isOnCooldown(corpseName) then
+    if validateCorpseForRez(corpse) and not res.resQueue[corpse.ID()] and not isOnCooldown(corpseName) then
         table.insert(res.resQueue, {corpse = corpse, spell = resSpell, slot = 8})
     elseif isOnCooldown(corpseName) then
         return
@@ -120,14 +120,14 @@ function res.consentErrorCallback(line)
     consentEvent = true  -- Set the flag to indicate the event was triggered
 end
 
--- Process the resurrection queue with event checking
-local function processResurrectionQueue()
+-- Process the rez queue with event checking
+local function processRezQueue()
     if gui.botOn then
         while #res.resQueue > 0 do
             if gui.botOn then
-                -- Check if the useRes checkbox is still enabled
-                if not gui.useRes then
-                    return  -- Exit the resurrection processing if useRes is unchecked
+                -- Check if the useRez checkbox is still enabled
+                if not gui.useRez then
+                    return  -- Exit the rez processing if useRez is unchecked
                 end
 
                 local resTask = table.remove(res.resQueue, 1)
@@ -146,7 +146,7 @@ local function processResurrectionQueue()
                     end
                 end
 
-                if validateCorpseForResurrection(corpse) and preCastChecks() then
+                if validateCorpseForRez(corpse) and preCastChecks() then
                     if not gui.useEpic then
                         if not hasEnoughMana(resSpell) then
                             utils.sitMed()
@@ -155,11 +155,11 @@ local function processResurrectionQueue()
                     end
 
                     local retryAttempts = 3  -- Set maximum retries for each member
-                    local success = false    -- Track if resurrection is successful
+                    local success = false    -- Track if rez is successful
             
                     for attempt = 1, retryAttempts do
-                        -- Exit loop if gui.useRes becomes unchecked mid-resurrection
-                        if not gui.useRes then
+                        -- Exit loop if gui.useRez becomes unchecked mid-rez
+                        if not gui.useRez then
                             return
                         end
 
@@ -187,7 +187,7 @@ local function processResurrectionQueue()
                             return
                         end
 
-                        if not corpse and not isCorpseEligibleForResurrection(corpse, inRaid, inGroup) then
+                        if not corpse and not isCorpseEligibleForRez(corpse, inRaid, inGroup) then
                             return
                         end
 
@@ -200,7 +200,7 @@ local function processResurrectionQueue()
                             local maxDragAttempts = 3
                             while dragAttempts < maxDragAttempts do
                                 if mq.TLO.Target() and mq.TLO.Target.Distance() then
-                                    if mq.TLO.Target.Distance() > resurrectionDistance and mq.TLO.Target.Distance() <= dragDistance then
+                                    if mq.TLO.Target.Distance() > rezDistance and mq.TLO.Target.Distance() <= dragDistance then
                                         mq.cmd('/corpse')
                                         mq.delay(500)
                                     end
@@ -238,7 +238,7 @@ local function processResurrectionQueue()
                                 break
                             end
 
-                            -- Proceed with resurrection if within resurrectionDistance
+                            -- Proceed with rez if within rezDistance
                             if not isTargetInRange(corpseName, resSpell) then
                                 break
                             end
@@ -258,8 +258,8 @@ local function processResurrectionQueue()
                             end
                             mq.cmdf('/dgtell All "Resurrected corpse: %s"', corpseName)
                             
-                            resCooldown[corpseName] = os.time()  -- Add to cooldown after successful resurrection
-                            success = true  -- Mark resurrection as successful
+                            resCooldown[corpseName] = os.time()  -- Add to cooldown after successful rez
+                            success = true  -- Mark rez as successful
                             mq.delay(50)
 
                             mq.cmd('/target clear')
@@ -281,14 +281,14 @@ local function processResurrectionQueue()
     end
 end
 
--- Main function to check nearby corpses and queue resurrections
+-- Main function to check nearby corpses and queue rezs
 function res.resRoutine()
     if gui.botOn then
-        if not gui.useRes or clericLevel < 12 then
+        if not gui.useRez or clericLevel < 12 then
             return
         end
 
-        local bestResSpell = clericspells.findBestSpell("Resurrection", clericLevel)
+        local bestResSpell = clericspells.findBestSpell("Rez", clericLevel)
 
         if not gui.useEpic then
             if not bestResSpell then
@@ -305,42 +305,42 @@ function res.resRoutine()
             return
         end
 
-        -- Load the resurrection spell if it is not already loaded in Gem 8
+        -- Load the rez spell if it is not already loaded in Gem 8
         if tostring(mq.TLO.Me.Gem(8)) ~= bestResSpell and not gui.useEpic then
-            clericspells.loadAndMemorizeSpell("Resurrection", clericLevel, 8)
+            clericspells.loadAndMemorizeSpell("Rez", clericLevel, 8)
         end
 
-        -- Queue eligible corpses for resurrection
+        -- Queue eligible corpses for rez
         local resurrectCount = 0
         for i = 1, nearbyCorpses do
             local corpse = mq.TLO.NearestSpawn(i .. ',pccorpse radius ' .. dragDistance)
-            if corpse and isCorpseEligibleForResurrection(corpse, inRaid, inGroup) then
-                queueResurrection(corpse, bestResSpell)
+            if corpse and isCorpseEligibleForRez(corpse, inRaid, inGroup) then
+                queueRez(corpse, bestResSpell)
                 resurrectCount = resurrectCount + 1
             end
         end
 
-        -- Process the resurrection queue if any corpses were added
+        -- Process the rez queue if any corpses were added
         if resurrectCount > 0 then
-            processResurrectionQueue()
+            processRezQueue()
         else
         end
     end
 end
 
-function res.manualResurrection(playerName)
+function res.manualRez(playerName)
     -- Check if playerName was provided
     if not playerName then
         return
     end
 
-    -- Check if character level is high enough for resurrection
+    -- Check if character level is high enough for rez
     if clericLevel < 12 then
         return
     end
 
-    -- Find the best available resurrection spell based on cleric level
-    local bestResSpell = clericspells.findBestSpell("Resurrection", clericLevel)
+    -- Find the best available rez spell based on cleric level
+    local bestResSpell = clericspells.findBestSpell("Rez", clericLevel)
     if not bestResSpell then
         return
     end
@@ -367,7 +367,7 @@ function res.manualResurrection(playerName)
             local spellRange = mq.TLO.Spell(bestResSpell).Range()
 
             if corpse.Distance() <= spellRange then
-                -- Cast resurrection spell
+                -- Cast rez spell
                 mq.cmdf('/cast "%s"', bestResSpell)
                 mq.delay(200)
                 while mq.TLO.Me.Casting() do

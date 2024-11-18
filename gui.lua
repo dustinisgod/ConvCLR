@@ -37,9 +37,9 @@ local function setDefaultConfig()
     gui.resistCold = false
     gui.resistDisease = false
     gui.resistPoison = false
-    gui.useRes = false
+    gui.useRez = false
     gui.useEpic = false
-    gui.combatRes = false
+    gui.combatRez = false
     gui.sitMed = false
     gui.stopCast = false
     gui.stopCastPct = 95
@@ -300,16 +300,16 @@ local function clericControlGUI()
     end
 
     ImGui.Spacing()
-    if ImGui.CollapsingHeader("Res Settings") then
+    if ImGui.CollapsingHeader("Rez Settings") then
     ImGui.Spacing()
 
-        gui.useRes = ImGui.Checkbox("Res", gui.useRes or false)
-            if gui.useRes then
+        gui.useRez = ImGui.Checkbox("Rez", gui.useRez or false)
+            if gui.useRez then
                 ImGui.SameLine()
                 gui.useEpic = ImGui.Checkbox("Epic", gui.useEpic or false)
                 ImGui.SameLine()
-                gui.combatRes = ImGui.Checkbox("Combat Res", gui.combatRes or false)
-                    if gui.combatRes and not gui.useEpic then
+                gui.combatRez = ImGui.Checkbox("Combat Rez", gui.combatRez or false)
+                    if gui.combatRez and not gui.useEpic then
                         gui.useKarn = false
                     end
             end
@@ -386,7 +386,7 @@ local function clericControlGUI()
             end
         gui.useKarn = ImGui.Checkbox("Mark of Karn", gui.useKarn or false)
             if gui.useKarn and not gui.useEpic then
-                gui.combatRes = false
+                gui.combatRez = false
             end
     end
 

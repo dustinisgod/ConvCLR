@@ -64,7 +64,7 @@ local spellList = {
         {level = 28, name = "Counteract Disease"},
         {level = 4, name = "Cure Disease"}
     },
-    Resurrection = {
+    Rez = {
         {level = 12, name = "Reanimation"}
     },
     BuffMagic = {
@@ -152,12 +152,12 @@ function clericspells.loadDefaultSpells(clericLevel)
 
     -- Slot 8 - Buff AC Only or Resurrection (BuffACOnly, Res)
     if clericLevel >= 56 then
-        if gui.useKarn or (gui.useRes and gui.useEpic) then
+        if gui.useKarn or (gui.useRez and gui.useEpic) then
             defaultSpells[8] = "Mark of Karn"
-        elseif gui.useRes and not gui.useKarn and not gui.useEpic then
+        elseif gui.useRez and not gui.useKarn and not gui.useEpic then
             defaultSpells[8] = "Reanimation"
         end
-    elseif clericLevel >= 12 and gui.useRes and not gui.useEpic then
+    elseif clericLevel >= 12 and gui.useRez and not gui.useEpic then
         defaultSpells[8] = "Reanimation"
     elseif clericLevel >= 2 and clericLevel < 12 then
         defaultSpells[8] = "Holy Armor"
