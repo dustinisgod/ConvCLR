@@ -184,11 +184,11 @@ function clericspells.memorizeSpells(spells)
                     break
                 else
                     -- Clear the slot first
-                    mq.cmdf('/mem "" %d', slot)
+                    mq.cmdf('/memorize "" %d', slot)
                     mq.delay(500)  -- Delay for slot clearance
 
                     -- Issue the command to memorize the spell
-                    mq.cmdf('/mem "%s" %d', spellName, slot)
+                    mq.cmdf('/memorize "%s" %d', spellName, slot)
                     mq.delay(1000)  -- Initial delay for memorization
 
                     -- Wait for spellbook to close, with a timeout
@@ -243,7 +243,7 @@ function clericspells.loadAndMemorizeSpell(spellType, level, spellSlot)
     end
 
     -- Memorize the spell in the correct slot
-    mq.cmdf('/mem "%s" %d', bestSpell, spellSlot)
+    mq.cmdf('/memorize "%s" %d', bestSpell, spellSlot)
     mq.delay(1000)  -- Initial delay to allow the memorization command to take effect
 
     local timeout = 10  -- Timeout in seconds
