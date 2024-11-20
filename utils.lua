@@ -94,8 +94,8 @@ function utils.monitorBuffs()
                 buffer.buffRoutine()
 
                 -- Set lastBuffTime to the current time + random interval
-                local randomDelay = math.random(240, 600)  -- Random delay between 240 and 360 seconds
-                lastBuffTime = currentTime + randomDelay
+                local timedDelay = 120 -- Random delay between 240 and 600 seconds
+                lastBuffTime = currentTime + timedDelay
             end
         end
     end
