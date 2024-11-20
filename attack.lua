@@ -1,6 +1,6 @@
 local mq = require('mq')
 local gui = require('gui')
-local clericspells = require('clericspells')
+local spells = require('spells')
 
 local attack = {}
 
@@ -52,6 +52,7 @@ local function castOnTarget(targetID, targetName, spellName)
 end
 
 function attack.attackRoutine()
+    charLevel = mq.TLO.Me.Level()
     -- Ensure bot is active, useKarn is enabled, and mainAssist is in zone
     if not gui.botOn or not gui.useKarn then
         return
@@ -69,7 +70,7 @@ function attack.attackRoutine()
     end
 
     -- Find the best Reverse Damage Shield spell
-    local bestAttackSpell = clericspells.findBestSpell("ReverseDS", charLevel)
+    local bestAttackSpell = spells.findBestSpell("ReverseDS", charLevel)
 
     -- Only proceed if we have a valid spell to cast
     if not bestAttackSpell then
@@ -78,7 +79,7 @@ function attack.attackRoutine()
 
     -- Load the resurrection spell if it is not already loaded in Gem 8
     if tostring(mq.TLO.Me.Gem(8)) ~= bestAttackSpell and gui.useKarn then
-        clericspells.loadAndMemorizeSpell("ReverseDS", charLevel, 8)
+        spells.loadAndMemorizeSpell("ReverseDS", charLevel, 8)
     end
 
     -- Assist main assist to obtain target

@@ -133,6 +133,7 @@ end
 
 -- Heal routine that focuses on group members 0 through 5 and optional extended targets
 function healing.healRoutine()
+    clericLevel = mq.TLO.Me.Level()  -- Update cleric level each iteration
     if not gui.botOn then return end
 
     local groupHealThreshold = gui.groupHealPct or 80

@@ -1,7 +1,8 @@
 local mq = require('mq')
-local clericspells = require('clericspells')
+local pells = require('spells')
 local utils = require('utils')
 local gui = require('gui')
+local spells = require('spells')
 
 local cures = {}
 
@@ -9,7 +10,7 @@ local cures = {}
 local cureCooldowns = {}  -- Track cooldowns for casting cures on members
 local cureQueue = {}  -- Queue for curing members
 local MAX_CURE_RETRIES = 3  -- Maximum retries for each cure attempt
-local charLevel = mq.TLO.Me.Level()
+local charLevel = mq.TLO.Me.Level() or 0
 
 local function isGroupMember(targetID)
     for i = 1, mq.TLO.Group.Members() do
@@ -23,9 +24,9 @@ end
 -- Function to check if a target is afflicted and return the best cure spell
 local function getCureSpell(afflictionType)
     if afflictionType == "Poison" then
-        return clericspells.findBestSpell("CurePoison", charLevel)
+        return spells.findBestSpell("CurePoison", charLevel)
     elseif afflictionType == "Disease" then
-        return clericspells.findBestSpell("CureDisease", charLevel)
+        return spells.findBestSpell("CureDisease", charLevel)
     end
 end
 
@@ -104,6 +105,7 @@ end
 
 -- Process the queue by affliction type using the cureQueue generated in queueAfflictedMembers
 local function processCureQueueByType(afflictionType)
+    charLevel = mq.TLO.Me.Level()  -- Update cleric level for each type
     if gui.botOn then
         for i = #cureQueue, 1, -1 do
             local entry = cureQueue[i]
@@ -132,7 +134,7 @@ local function processCureQueueByType(afflictionType)
                     
                     -- Memorize the spell if it is not already memorized in the correct slot
                     if mq.TLO.Me.Gem(gemSlot).Name() ~= spell then
-                        clericspells.loadAndMemorizeSpell(afflictionType == "Poison" and "CurePoison" or "CureDisease", charLevel, gemSlot)
+                        spells.loadAndMemorizeSpell(afflictionType == "Poison" and "CurePoison" or "CureDisease", charLevel, gemSlot)
                     end
 
                     -- Wait for the spell to be ready

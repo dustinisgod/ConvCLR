@@ -1,6 +1,6 @@
 local mq = require('mq')
 local gui = require('gui')
-local clericspells = require('clericspells')
+local spells = require('spells')
 local healing = require('healing')
 local utils = require('utils')
 
@@ -13,7 +13,7 @@ local dragDistance = 100         -- Distance to start dragging corpses towards u
 local resCooldown = {}  -- Track corpses on cooldown
 local consentEvent = false  -- Flag to check if an event was processed
 local charName = mq.TLO.Me.Name()
-local clericLevel = mq.TLO.Me.Level()
+local charLevel = mq.TLO.Me.Level() or 0
 
 local function preCastChecks()
     if mq.TLO.Me.Moving() or mq.TLO.Me.Casting() then
@@ -283,12 +283,13 @@ end
 
 -- Main function to check nearby corpses and queue rezs
 function res.resRoutine()
+    charLevel = mq.TLO.Me.Level()
     if gui.botOn then
-        if not gui.useRez or clericLevel < 12 then
+        if not gui.useRez or charLevel < 12 then
             return
         end
 
-        local bestResSpell = clericspells.findBestSpell("Rez", clericLevel)
+        local bestResSpell = spells.findBestSpell("Rez", charLevel)
 
         if not gui.useEpic then
             if not bestResSpell then
@@ -307,7 +308,7 @@ function res.resRoutine()
 
         -- Load the rez spell if it is not already loaded in Gem 8
         if tostring(mq.TLO.Me.Gem(8)) ~= bestResSpell and not gui.useEpic then
-            clericspells.loadAndMemorizeSpell("Rez", clericLevel, 8)
+            spells.loadAndMemorizeSpell("Rez", charLevel, 8)
         end
 
         -- Queue eligible corpses for rez
@@ -335,12 +336,12 @@ function res.manualRez(playerName)
     end
 
     -- Check if character level is high enough for rez
-    if clericLevel < 12 then
+    if charLevel < 12 then
         return
     end
 
     -- Find the best available rez spell based on cleric level
-    local bestResSpell = clericspells.findBestSpell("Rez", clericLevel)
+    local bestResSpell = spells.findBestSpell("Rez", charLevel)
     if not bestResSpell then
         return
     end

@@ -38,20 +38,21 @@ local function setGroupHeal(value) setToggleOption("groupHeal", value, "Group He
 local function setUseCures(value) setToggleOption("useCures", value, "Use Cures") end
 local function setBuffGroup(value) setToggleOption("buffGroup", value, "Buff Group") end
 local function setBuffRaid(value) setToggleOption("buffRaid", value, "Buff Raid") end
-local function setAchpBuff(value) setToggleOption("achpBuff", value, "Aegis") end
-local function setHpOnlyBuff(value) setToggleOption("hpOnlyBuff", value, "Symbol") end
-local function setAcOnlyBuff(value) setToggleOption("acOnlyBuff", value, "Shield") end
-local function setResistMagic(value) setToggleOption("resistMagic", value, "Resist Magic") end
-local function setResistFire(value) setToggleOption("resistFire", value, "Resist Fire") end
-local function setResistCold(value) setToggleOption("resistCold", value, "Resist Cold") end
-local function setResistDisease(value) setToggleOption("resistDisease", value, "Resist Disease") end
-local function setResistPoison(value) setToggleOption("resistPoison", value, "Resist Poison") end
+local function setAchpBuff(value) setToggleOption("buffaegis", value, "Aegis") end
+local function setHpOnlyBuff(value) setToggleOption("buffsymbol", value, "Symbol") end
+local function setAcOnlyBuff(value) setToggleOption("buffshield", value, "Shield") end
+local function setResistMagic(value) setToggleOption("buffmagic", value, "Resist Magic") end
+local function setResistFire(value) setToggleOption("bufffire", value, "Resist Fire") end
+local function setResistCold(value) setToggleOption("buffcold", value, "Resist Cold") end
+local function setResistDisease(value) setToggleOption("buffdisease", value, "Resist Disease") end
+local function setResistPoison(value) setToggleOption("buffpoison", value, "Resist Poison") end
 local function setResOn(value) setToggleOption("useRez", value, "Resurrection") end
 local function setUseEpic(value) setToggleOption("useEpic", value, "Use Epic") end
 local function setcombatRez(value) setToggleOption("combatRez", value, "Combat Res") end
 local function setSitMed(value) setToggleOption("sitMed", value, "Sit Med") end
 local function setKarn(value) setToggleOption("useKarn", value, "Mark of Karn") end
 local function setStopCast(value) setToggleOption("stopCast", value, "Stop Cast") end
+local function setBuffsOnOff(value) setToggleOption("buffsOn", value, "Buffs Toggle") end
 
 -- Functions for setting slider values
 local function setMainHealPct(value)
@@ -229,6 +230,8 @@ local function commandHandler(command, ...)
         setStopCast(args[1])
     elseif command == "karn" then
         setKarn(args[1])
+    elseif command == "buffs" then
+        setBuffsOnOff(args[1])
 
     -- Slider Commands
     elseif command == "mainhealpct" then

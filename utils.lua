@@ -4,15 +4,46 @@ local utils = {}
 local nav = require('nav')
 local attack = require('attack')
 
+utils.IsUsingDanNet = true
+utils.IsUsingTwist = false
+utils.IsUsingCast = true
+utils.IsUsingMelee = false
+
+local DEBUG_MODE = false
+-- Debug print helper function
+local function debugPrint(...)
+    if DEBUG_MODE then
+        print(...)
+    end
+end
+
 function utils.PluginCheck()
     if utils.IsUsingDanNet then
-        if not mq.TLO.Plugin('mq2dannet') or not mq.TLO.Plugin('mq2dannet').IsLoaded() then
+        if not mq.TLO.Plugin('mq2dannet').IsLoaded() then
             printf("Plugin \ayMQ2DanNet\ax is required. Loading it now.")
             mq.cmd('/plugin mq2dannet noauto')
         end
-        -- turn off fullname mode in DanNet if it's active
-        if mq.TLO.DanNet and mq.TLO.DanNet.FullNames() then
+        -- turn off fullname mode in DanNet
+        if mq.TLO.DanNet.FullNames() then
             mq.cmd('/dnet fullnames off')
+        end
+        if utils.IsUsingTwist then
+            if not mq.TLO.Plugin('mq2twist').IsLoaded() then
+                printf("Plugin \ayMQ2Twist\ax is required. Loading it now.")
+                mq.cmd('/plugin mq2twist noauto')
+            end
+        end
+        if utils.IsUsingCast then
+            if not mq.TLO.Plugin('mq2cast').IsLoaded() then
+                printf("Plugin \ayMQ2Cast\ax is required. Loading it now.")
+                mq.cmd('/plugin mq2cast noauto')
+            end
+        end
+        if not utils.IsUsingMelee then
+            if mq.TLO.Plugin('mq2melee').IsLoaded() then
+                printf("Plugin \ayMQ2Melee\ax is not recommended. Unloading it now.")
+                mq.cmd('/plugin mq2melee unload')
+            end
         end
     end
 end
@@ -69,11 +100,10 @@ function utils.monitorRes()
     end
 end
 
-local lastBuffTime = 0
+utils.nextBuffTime = 0  -- Global variable to track next scheduled time
 
 function utils.monitorBuffs()
-    if gui.botOn then
-        local buffer = require('buffer')
+    if gui.botOn and gui.buffsOn then
         if not gui then
             printf("Error: gui is nil")
             return
@@ -81,22 +111,17 @@ function utils.monitorBuffs()
 
         local currentTime = os.time()
 
-        if (gui.achpBuff or
-            gui.hpOnlyBuff or
-            gui.acOnlyBuff or
-            gui.resistMagic or
-            gui.resistCold or
-            gui.resistFire or
-            gui.resistDisease or
-            gui.resistPoison) and (currentTime >= lastBuffTime) then
-            
-            if mq.TLO.Me.PctMana() > 20 then
-                buffer.buffRoutine()
-
-                -- Set lastBuffTime to the current time + random interval
-                local timedDelay = 120 -- Random delay between 240 and 600 seconds
-                lastBuffTime = currentTime + timedDelay
-            end
+        if (gui.buffaegis or
+            gui.buffsymbol or
+            gui.buffshield or
+            gui.buffmagic or
+            gui.buffcold or
+            gui.bufffire or
+            gui.buffdisease or
+            gui.buffpoison) and (currentTime >= utils.nextBuffTime) then
+            local buffer = require('buffer')
+            buffer.buffRoutine()
+            utils.nextBuffTime = currentTime + 240  -- Schedule next run in 240 seconds
         end
     end
 end

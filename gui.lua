@@ -29,14 +29,14 @@ local function setDefaultConfig()
     gui.useCures = false
     gui.buffGroup = false
     gui.buffRaid = false
-    gui.achpBuff = false
-    gui.hpOnlyBuff = false
-    gui.acOnlyBuff = false
-    gui.resistMagic = false
-    gui.resistFire = false
-    gui.resistCold = false
-    gui.resistDisease = false
-    gui.resistPoison = false
+    gui.buffaegis = false
+    gui.buffsymbol = false
+    gui.buffshield = false
+    gui.buffmagic = false
+    gui.bufffire = false
+    gui.buffcold = false
+    gui.buffdisease = false
+    gui.buffpoison = false
     gui.useRez = false
     gui.useEpic = false
     gui.combatRez = false
@@ -255,48 +255,73 @@ local function clericControlGUI()
     ImGui.Spacing()
     if ImGui.CollapsingHeader("Buff Settings") then
     ImGui.Spacing()
+    gui.buffsOn = ImGui.Checkbox("Buffs On", gui.buffsOn or false)
+        if gui.buffsOn then
 
-        -- Checkbox for Buff Group
-        gui.buffGroup = ImGui.Checkbox("Buff Group", gui.buffGroup or false)
-        if gui.buffGroup then
-            gui.buffRaid = false
+            if gui.botOn then
+                local utils = require("utils")
+                local currentTime = os.time()
+                local timeLeft = math.max(0, utils.nextBuffTime - currentTime)
+    
+                if timeLeft > 0 then
+                    ImGui.Text(string.format("Buff Check In: %d seconds", timeLeft))
+                else
+                    ImGui.Text("Buff Check Running.")
+                end
+            else
+                ImGui.Text("Bot is not active.")
+            end
+
+            ImGui.Spacing()
+            
+            if ImGui.Button("Force Buff Check") then
+                local utils = require("utils")
+                utils.nextBuffTime = 0
+            end
+
+            ImGui.Spacing()
+            -- Checkbox for Buff Group
+            gui.buffGroup = ImGui.Checkbox("Buff Group", gui.buffGroup or false)
+            if gui.buffGroup then
+                gui.buffRaid = false
+            end
+
+            ImGui.SameLine()
+
+            -- Checkbox for Buff Raid
+            gui.buffRaid = ImGui.Checkbox("Buff Raid", gui.buffRaid or false)
+            if gui.buffRaid then
+                gui.buffGroup = false
+            end
+
+            ImGui.Spacing()
+            ImGui.Separator()
+            ImGui.Spacing()
+
+            ColoredText("AC/HP Buffs", {1.0, 1.0, 0.0, 1.0})
+            ImGui.Separator()
+
+            gui.buffaegis = ImGui.Checkbox("Aegis", gui.buffaegis or false)
+            ImGui.SameLine()
+            gui.buffsymbol = ImGui.Checkbox("Symbol", gui.buffsymbol or false)
+            ImGui.SameLine()
+            gui.buffshield = ImGui.Checkbox("Shield", gui.buffshield or false)
+            ImGui.Separator()
+
+            ColoredText("Resist Buffs", {1.0, 1.0, 0.0, 1.0})
+            ImGui.Separator()
+
+            gui.buffmagic = ImGui.Checkbox("Magic", gui.buffmagic or false)
+            ImGui.SameLine()
+            gui.bufffire = ImGui.Checkbox("Fire", gui.bufffire or false)
+            ImGui.SameLine()
+            gui.buffcold = ImGui.Checkbox("Cold", gui.buffcold or false)
+            ImGui.SameLine()
+            gui.buffdisease = ImGui.Checkbox("Disease", gui.buffdisease or false)
+            ImGui.SameLine()
+            gui.buffpoison = ImGui.Checkbox("Poison", gui.buffpoison or false)
+            ImGui.Separator()
         end
-
-        ImGui.SameLine()
-
-        -- Checkbox for Buff Raid
-        gui.buffRaid = ImGui.Checkbox("Buff Raid", gui.buffRaid or false)
-        if gui.buffRaid then
-            gui.buffGroup = false
-        end
-
-        ImGui.Spacing()
-        ImGui.Separator()
-        ImGui.Spacing()
-
-        ColoredText("AC/HP Buffs", {1.0, 1.0, 0.0, 1.0})
-        ImGui.Separator()
-
-        gui.achpBuff = ImGui.Checkbox("Aegis", gui.achpBuff or false)
-        ImGui.SameLine()
-        gui.hpOnlyBuff = ImGui.Checkbox("Symbol", gui.hpOnlyBuff or false)
-        ImGui.SameLine()
-        gui.acOnlyBuff = ImGui.Checkbox("Shield", gui.acOnlyBuff or false)
-        ImGui.Separator()
-
-        ColoredText("Resist Buffs", {1.0, 1.0, 0.0, 1.0})
-        ImGui.Separator()
-
-        gui.resistMagic = ImGui.Checkbox("Magic", gui.resistMagic or false)
-        ImGui.SameLine()
-        gui.resistFire = ImGui.Checkbox("Fire", gui.resistFire or false)
-        ImGui.SameLine()
-        gui.resistCold = ImGui.Checkbox("Cold", gui.resistCold or false)
-        ImGui.SameLine()
-        gui.resistDisease = ImGui.Checkbox("Disease", gui.resistDisease or false)
-        ImGui.SameLine()
-        gui.resistPoison = ImGui.Checkbox("Poison", gui.resistPoison or false)
-        ImGui.Separator()
     end
 
     ImGui.Spacing()

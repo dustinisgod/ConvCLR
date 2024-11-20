@@ -2,10 +2,11 @@ local mq = require('mq')
 local utils = require('utils')
 local commands = require('commands')
 local gui = require('gui')
-local clericspells = require('clericspells')
+local spells = require('spells')
 local healing = require('healing')
 local res = require('res')
 local nav = require('nav')
+local buffer = require('buffer')
 
 local class = mq.TLO.Me.Class()
 if class ~= "Cleric" then
@@ -13,11 +14,9 @@ if class ~= "Cleric" then
     mq.exit()
 end
 
-local currentLevel = mq.TLO.Me.Level()
+local charLevel = mq.TLO.Me.Level() or 0
 
 utils.PluginCheck()
-
-mq.cmd("/plugin mq2cast load")
 
 mq.imgui.init('clericControlGUI', gui.clericControlGUI)
 
@@ -31,17 +30,19 @@ local startupRun = false
 -- Function to check the botOn status and run startup once
 local function checkBotOn(currentLevel)
     if gui.botOn and not startupRun then
-        -- Run the startup function once
-        clericspells.startup(currentLevel)
+        nav.setCamp()
+        spells.startup(currentLevel)
         startupRun = true  -- Set flag to prevent re-running
-        printf("Bot has been turned on. Running clericspells.startup.")
+        printf("Bot has been turned on. Running startup.")
+
+        if gui.buffsOn then
+            buffer.buffRoutine()
+        end
     elseif not gui.botOn and startupRun then
         -- Optional: Reset the flag if bot is turned off
         startupRun = false
-        printf("Bot has been turned off. Ready to run clericspells.startup again.")
     end
 end
-
 
 -- Persistent toggle state to track changes in gui.botOn
 local toggleboton = gui.botOn or false
@@ -58,36 +59,43 @@ local function returnChaseToggle()
     end
 end
 
-
-
-
 while gui.clericControlGUI do
 
     returnChaseToggle()
 
     if gui.botOn then
 
-        checkBotOn(currentLevel)
+        checkBotOn(charLevel)
 
         utils.monitorNav()
 
         healing.healRoutine()
 
-        utils.monitorRes()
+        if gui.useRez then
+            utils.monitorRes()
+        end
 
-        utils.sitMed()
+        if gui.sitMed then
+            utils.sitMed()
+        end
 
-        utils.monitorAttack()
+        if gui.useKarn then
+            utils.monitorAttack()
+        end
 
-        utils.monitorBuffs()
+        if gui.buffsOn then
+            utils.monitorBuffs()
+        end
 
-        utils.monitorCures()
+        if gui.useCures then
+            utils.monitorCures()
+        end
 
         local newLevel = mq.TLO.Me.Level()
-        if newLevel ~= currentLevel then
-            printf(string.format("Cleric level has changed from %d to %d. Updating spells.", currentLevel, newLevel))
-            clericspells.startup(newLevel)
-            currentLevel = newLevel
+        if newLevel ~= charLevel then
+            printf(string.format("Cleric level has changed from %d to %d. Updating spells.", charLevel, newLevel))
+            spells.startup(newLevel)
+            charLevel = newLevel
         end
     end
 
