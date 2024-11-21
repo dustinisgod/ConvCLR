@@ -60,16 +60,16 @@ end
 
 -- Helper function to cast a spell on the specified target
 local function castSpell(targetID, targetName, spellName)
-    mq.cmdf('/dgtell ALL %s - Casting %s on %s', clericName, spellName, targetName)
-    mq.cmdf('/tar ID %s', targetID)
-    mq.delay(200)
     if targetID ~= mq.TLO.Target.ID() then
-        mq.cmdf('/tar ID %s', targetID)
-        mq.delay(200)
+    mq.cmdf('/tar ID %s', targetID)
     end
+    mq.delay(200)
 
+    if targetID == mq.TLO.Target.ID() then
+    mq.cmdf('/dgtell ALL Casting %s on %s', spellName, targetName)
     mq.cmdf('/cast %s', spellName)
     mq.delay(100)
+    end
 
     while mq.TLO.Me.Casting() do
         if gui.stopCast then
@@ -181,17 +181,44 @@ function healing.healRoutine()
             local extTarget = mq.TLO.Me.XTarget(extIndex)
             if extTarget and extTarget.ID() and extTarget.ID() ~= 0 and not extTarget.Dead() and (extTarget.Type() == "PC" or extTarget.Type() == "Pet") then
                 local extID = extTarget.ID()
-
+                local extName = extTarget.CleanName()
+                local extPctHP = extTarget.PctHPs() or 0
+                local extClass = extTarget.Class.ShortName() or ""
+    
                 -- Check if the extended target is already a group member
                 if isGroupMember(extID) then
-                    mq.cmdf('/echo ERROR: Extended Target %s is already a group member.', extTarget.CleanName())
+                    mq.cmdf('/echo ERROR: Extended Target %s is already a group member.', extName)
                 else
-                    local extPctHP = extTarget.PctHPs() or 0
-                    local extName = extTarget.CleanName()
-                    local extClass = extTarget.Class.ShortName() or ""
-
-                    if gui["ExtTargetMainHeal" .. extIndex] or gui["ExtTargetHoT" .. extIndex] or gui["ExtTargetFastHeal" .. extIndex] or gui["ExtTargetCompleteHeal" .. extIndex] then
-                        processHealsForTarget(extID, extName, extPctHP, extClass, true, extIndex)
+                    -- Check Main Heal
+                    if gui["ExtTargetMainHeal" .. extIndex] then
+                        local mainHealThreshold = gui["ExtTargetMainHeal" .. extIndex .. "Pct"]
+                        if extPctHP <= mainHealThreshold then
+                            processHealsForTarget(extID, extName, extPctHP, extClass, true, extIndex)
+                        end
+                    end
+    
+                    -- Check HoT
+                    if gui["ExtTargetHoT" .. extIndex] then
+                        local hotThreshold = gui["ExtTargetHoT" .. extIndex .. "Pct"]
+                        if extPctHP <= hotThreshold then
+                            processHealsForTarget(extID, extName, extPctHP, extClass, true, extIndex)
+                        end
+                    end
+    
+                    -- Check Fast Heal
+                    if gui["ExtTargetFastHeal" .. extIndex] then
+                        local fastHealThreshold = gui["ExtTargetFastHeal" .. extIndex .. "Pct"]
+                        if extPctHP <= fastHealThreshold then
+                            processHealsForTarget(extID, extName, extPctHP, extClass, true, extIndex)
+                        end
+                    end
+    
+                    -- Check Complete Heal
+                    if gui["ExtTargetCompleteHeal" .. extIndex] then
+                        local completeHealThreshold = gui["ExtTargetCompleteHeal" .. extIndex .. "Pct"]
+                        if extPctHP <= completeHealThreshold then
+                            processHealsForTarget(extID, extName, extPctHP, extClass, true, extIndex)
+                        end
                     end
                 end
             end

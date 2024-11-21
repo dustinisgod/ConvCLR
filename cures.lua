@@ -1,5 +1,5 @@
 local mq = require('mq')
-local pells = require('spells')
+local healing = require('healing')
 local utils = require('utils')
 local gui = require('gui')
 local spells = require('spells')
@@ -19,6 +19,13 @@ local function isGroupMember(targetID)
         end
     end
     return false
+end
+
+-- Function to handle the heal routine and return
+local function handleHealRoutineAndReturn()
+    healing.healRoutine()
+    utils.monitorNav()
+    return true
 end
 
 -- Function to check if a target is afflicted and return the best cure spell
@@ -67,6 +74,8 @@ local function queueAfflictedMembers()
             goto continue
         end
 
+        if not handleHealRoutineAndReturn() then return end
+
         -- Target the member and check for poison or disease afflictions
         mq.cmdf('/tar id %s', memberID)
         mq.delay(200)
@@ -110,6 +119,9 @@ local function processCureQueueByType(afflictionType)
         for i = #cureQueue, 1, -1 do
             local entry = cureQueue[i]
             if entry.type == afflictionType then
+
+                if not handleHealRoutineAndReturn() then return end
+                
                 local memberName = entry.name
                 local spell = getCureSpell(afflictionType)
 

@@ -99,11 +99,18 @@ local function isOnCooldown(corpseName)
     return false
 end
 
--- Function to add a corpse to the rez queue, checks cooldown status
+local function shuffleQueue(queue)
+    for i = #queue, 2, -1 do
+        local j = math.random(1, i)
+        queue[i], queue[j] = queue[j], queue[i]
+    end
+end
+
 local function queueRez(corpse, resSpell)
     local corpseName = corpse.CleanName()
     if validateCorpseForRez(corpse) and not res.resQueue[corpse.ID()] and not isOnCooldown(corpseName) then
         table.insert(res.resQueue, {corpse = corpse, spell = resSpell, slot = 8})
+        shuffleQueue(res.resQueue) -- Shuffle the queue after adding the corpse
     elseif isOnCooldown(corpseName) then
         return
     end
