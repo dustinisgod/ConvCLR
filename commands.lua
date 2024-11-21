@@ -208,15 +208,15 @@ local function commandHandler(command, ...)
         setHpOnlyBuff(args[1])
     elseif command == "shield" then
         setAcOnlyBuff(args[1])
-    elseif command == "buffmagic" then
+    elseif command == "magic" then
         setResistMagic(args[1])
-    elseif command == "bufffire" then
+    elseif command == "fire" then
         setResistFire(args[1])
-    elseif command == "buffcold" then
+    elseif command == "cold" then
         setResistCold(args[1])
-    elseif command == "buffdisease" then
+    elseif command == "disease" then
         setResistDisease(args[1])
-    elseif command == "buffpoison" then
+    elseif command == "poison" then
         setResistPoison(args[1])
     elseif command == "rez" then
         setResOn(args[1])  -- Now takes on/off

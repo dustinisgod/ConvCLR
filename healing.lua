@@ -78,7 +78,7 @@ local function castSpell(targetID, targetName, spellName)
                 break
             end
         end
-        mq.delay(50)
+        mq.delay(10)
     end    
 end
 
