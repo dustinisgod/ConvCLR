@@ -123,10 +123,9 @@ function buffer.buffRoutine()
     -- Initialize spellTypes for buffs to cast on group members
     local spellTypes = {}
 
-    if gui.buffaegis then table.insert(spellTypes, charLevel >= 58 and "buffaegis" or "buffaegis")
-    elseif gui.buffsymbol and charLevel < 58 then table.insert(spellTypes, "buffsymbol")
-    elseif gui.buffshield and charLevel < 58 then table.insert(spellTypes, "buffshield")
-    end
+    if gui.buffaegis then table.insert(spellTypes, (charLevel >= 58 and "buffaegis") or "buffaegis") end
+    if gui.buffsymbol and charLevel < 58 then table.insert(spellTypes, "buffsymbol") end
+    if gui.buffshield and charLevel < 58 then table.insert(spellTypes, "buffshield") end
 
     -- Add group-wide buffs to spellTypes
     if gui.buffmagic then table.insert(spellTypes, "buffmagic") end
