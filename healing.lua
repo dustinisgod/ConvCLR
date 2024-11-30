@@ -104,7 +104,6 @@ local function processHealsForTarget(targetID, targetName, targetHP, targetClass
     -- Main Heal
     local mainHealThreshold = (isExtendedTarget and gui["ExtTargetMainHeal" .. extIndex .. "Pct"]) or gui.mainHealPct
     local class = mq.TLO.Spawn(targetID).Class.ShortName()
-    debugPrint("Class: " .. class)
     if gui.mainHeal and targetHP <= mainHealThreshold then
         debugPrint("Checking main heal conditions for target: " .. targetName)
         -- Special case for Shamans with Passive Heal enabled
