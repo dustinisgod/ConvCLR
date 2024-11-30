@@ -188,24 +188,27 @@ function buffer.buffRoutine()
         for _, spellType in ipairs(spellTypes) do
             local bestSpell = spells.findBestSpell(spellType, charLevel)
             if bestSpell and isClassEligibleForBuff(spellType, classShortName) then
-                -- Only queue the buff if it is missing and not already queued for this member
-                if not mq.TLO.Target.Buff(bestSpell)() then
-                    if not queuedBuffs[memberID][spellType] then
-                        debugPrint("DEBUG: Adding member ID", memberID, "to buffQueue for spell type:", spellType)
-                        table.insert(buffer.buffQueue, {memberID = memberID, spell = bestSpell, spellType = spellType})
-                        queuedBuffs[memberID][spellType] = true  -- Mark buff as queued for this member
+                -- Check if the buff will stack on the target
+                if mq.TLO.Spell(bestSpell).Stacks() then
+                    -- Only queue the buff if it is missing and not already queued for this member
+                    if not mq.TLO.Target.Buff(bestSpell)() then
+                        if not queuedBuffs[memberID][spellType] then
+                            debugPrint("DEBUG: Adding member ID", memberID, "to buffQueue for spell type:", spellType)
+                            table.insert(buffer.buffQueue, {memberID = memberID, spell = bestSpell, spellType = spellType})
+                            queuedBuffs[memberID][spellType] = true -- Mark buff as queued for this member
+                        else
+                            debugPrint("DEBUG: Buff", spellType, "already queued for member ID", memberID, ". Skipping.")
+                        end
                     else
-                        debugPrint("DEBUG: Buff", spellType, "already queued for member ID", memberID, ". Skipping.")
+                        debugPrint("DEBUG: Buff", spellType, "already active for member ID", memberID, ". Skipping.")
                     end
                 else
-                    debugPrint("DEBUG: Buff", spellType, "already active for member ID", memberID, ". Skipping.")
+                    debugPrint("DEBUG: Buff", spellType, "does not stack for member ID", memberID, ". Skipping.")
                 end
             end
         end
 
-        -- Optional mez handling if enabled
-        if gui.botOn and gui.mezOn then
-            debugPrint("DEBUG: Mez enabled, running mezTashRoutine")
+        if gui.botOn then
             if not handleHealRoutineAndReturn() then return end
         end
         mq.delay(100)  -- Delay between each member to reduce targeting interruptions

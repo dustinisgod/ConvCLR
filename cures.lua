@@ -7,7 +7,6 @@ local spells = require('spells')
 local cures = {}
 
 -- Configuration
-local cureCooldowns = {}  -- Track cooldowns for casting cures on members
 local cureQueue = {}  -- Queue for curing members
 local MAX_CURE_RETRIES = 3  -- Maximum retries for each cure attempt
 local charLevel = mq.TLO.Me.Level() or 0
@@ -38,7 +37,7 @@ local function getCureSpell(afflictionType)
 end
 
 -- Function to check if the cure spell is ready and mana is sufficient
-local function preCureChecks(spellName)
+local function preCureChecks()
     return not mq.TLO.Me.Moving() and not mq.TLO.Me.Casting() and mq.TLO.Me.PctMana() >= 20
 end
 
@@ -61,11 +60,8 @@ local function isTargetInRange(targetID, spellName)
     end
 end
 
-
 local function queueAfflictedMembers()
-    local clericLevel = mq.TLO.Me.Level()  -- Get cleric level once for all checks
 
-    -- Loop through each group member
     for i = 1, mq.TLO.Group.Members() do
         local member = mq.TLO.Group.Member(i)
         local memberID = member and member.ID()
@@ -80,10 +76,10 @@ local function queueAfflictedMembers()
         mq.cmdf('/tar id %s', memberID)
         mq.delay(200)
 
-        -- Only add to cureQueue if cleric meets the required level for each affliction
-        if mq.TLO.Target.Poisoned() and clericLevel >= 22 then
+
+        if mq.TLO.Target.Poisoned() and charLevel >= 22 then
             table.insert(cureQueue, {name = member.Name(), type = "Poison"})
-        elseif mq.TLO.Target.Diseased() and clericLevel >= 4 then
+        elseif mq.TLO.Target.Diseased() and charLevel >= 4 then
             table.insert(cureQueue, {name = member.Name(), type = "Disease"})
         end
 
@@ -101,10 +97,10 @@ local function queueAfflictedMembers()
                 mq.cmdf('/tar id %s', extID)
                 mq.delay(200)
 
-                -- Only add to cureQueue if cleric meets the required level for each affliction
-                if mq.TLO.Target.Poisoned() and clericLevel >= 22 then
+
+                if mq.TLO.Target.Poisoned() and charLevel >= 22 then
                     table.insert(cureQueue, {name = extTarget.CleanName(), type = "Poison"})
-                elseif mq.TLO.Target.Diseased() and clericLevel >= 4 then
+                elseif mq.TLO.Target.Diseased() and charLevel >= 4 then
                     table.insert(cureQueue, {name = extTarget.CleanName(), type = "Disease"})
                 end
             end
@@ -114,7 +110,6 @@ end
 
 -- Process the queue by affliction type using the cureQueue generated in queueAfflictedMembers
 local function processCureQueueByType(afflictionType)
-    charLevel = mq.TLO.Me.Level()  -- Update cleric level for each type
     if gui.botOn then
         for i = #cureQueue, 1, -1 do
             local entry = cureQueue[i]
@@ -140,7 +135,7 @@ local function processCureQueueByType(afflictionType)
                 end
 
                 -- Proceed to cast if they are still afflicted
-                if spell and preCureChecks(spell) then
+                if spell and preCureChecks() then
                     -- Determine the gem slot based on the affliction type
                     local gemSlot = afflictionType == "Poison" and 6 or 7
                     
@@ -179,7 +174,6 @@ local function processCureQueueByType(afflictionType)
                                 mq.delay(50)
                             end
                             mq.delay(100)
-                            cureCooldowns[memberName] = os.time()
                             table.remove(cureQueue, i)  -- Remove cured member from queue
                             break
                         else
@@ -197,15 +191,14 @@ end
 function cures.curesRoutine()
     if gui.botOn then
         if gui.useCures then
-            
+
             if mq.TLO.Me.PctMana() < 20 then
-                utils.sitMed()
                 return
             end
 
             -- Queue all afflicted members and randomize the queue
             queueAfflictedMembers()
-            
+
             -- Process each affliction type in turn
             processCureQueueByType("Poison")
             processCureQueueByType("Disease")

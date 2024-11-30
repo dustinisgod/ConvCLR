@@ -49,6 +49,8 @@ local function setDefaultConfig()
     gui.chaseTarget = ""
     gui.chaseDistance = 20
     gui.useKarn = false
+    gui.shamanPassiveHeal = false
+    gui.shamanPassiveHealPct = 70
     
     -- Extended Target Defaults for Healing
     for i = 1, 5 do
@@ -413,6 +415,12 @@ local function clericControlGUI()
             if gui.useKarn and not gui.useEpic then
                 gui.combatRez = false
             end
+        gui.shamanPassiveHeal = ImGui.Checkbox("Shaman Passive Heal", gui.shamanPassiveHeal or false)
+        if gui.shamanPassiveHeal then
+            ImGui.SameLine()
+            ImGui.SetNextItemWidth(100)
+            gui.shamanPassiveHealPct = ImGui.SliderInt("SPH %", gui.shamanPassiveHealPct, 1, 100)
+        end
     end
 
     ImGui.End()

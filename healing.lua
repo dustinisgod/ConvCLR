@@ -103,9 +103,21 @@ end
 local function processHealsForTarget(targetID, targetName, targetHP, targetClass, isExtendedTarget, extIndex)
     -- Main Heal
     local mainHealThreshold = (isExtendedTarget and gui["ExtTargetMainHeal" .. extIndex .. "Pct"]) or gui.mainHealPct
+    local class = mq.TLO.Spawn(targetID).Class.ShortName()
+    debugPrint("Class: " .. class)
     if gui.mainHeal and targetHP <= mainHealThreshold then
-        debugPrint("Processing heals for target: " .. targetName)
-        if preCastChecks() and mq.TLO.Me.SpellReady(mainhealSpell)() and isTargetInRange(targetID, mainhealSpell) and hasEnoughMana(mainhealSpell) then
+        debugPrint("Checking main heal conditions for target: " .. targetName)
+        -- Special case for Shamans with Passive Heal enabled
+        if class == "SHM" and gui.shamanPassiveHeal then
+            debugPrint("Checking passive heal conditions for Shaman target: " .. targetName)
+            if targetHP > gui.shamanPassiveHealPct then
+                debugPrint("Skipping heal for Shaman target: " .. targetName .. " as their HP is above the passive heal threshold.")
+                return -- Exit only for this specific target
+            elseif targetHP <= gui.shamanPassiveHealPct and hasEnoughMana(mainhealSpell) then
+                debugPrint("Casting passive heal on target: " .. targetName)
+                castSpell(targetID, targetName, mainhealSpell)
+            end
+        elseif preCastChecks() and mq.TLO.Me.SpellReady(mainhealSpell)() and isTargetInRange(targetID, mainhealSpell) and hasEnoughMana(mainhealSpell) then
             debugPrint("Casting main heal on target: " .. targetName)
             castSpell(targetID, targetName, mainhealSpell)
         end
