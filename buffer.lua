@@ -188,19 +188,18 @@ function buffer.buffRoutine()
         -- Check each buff type for the current member and add all missing buffs to the queue
         for _, spellType in ipairs(spellTypes) do
             local bestSpell = spells.findBestSpell(spellType, charLevel)
-            local bestspellstring = tostring(bestSpell)
 
-            if bestspellstring and isClassEligibleForBuff(spellType, classShortName) then
-                debugPrint("DEBUG: Best spell for", spellType, "is:", bestspellstring)
+            if bestSpell and isClassEligibleForBuff(spellType, classShortName) then
+                debugPrint("DEBUG: Best spell for", spellType, "is:", bestSpell)
                 -- Check if the buff will stack on the target
-                if mq.TLO.Spell(bestspellstring).StacksTarget() then
-                    debugPrint("DEBUG: Checking buff", spellType, "for member ID", memberID, "with spell:", bestspellstring)
+                if mq.TLO.Spell(bestSpell).StacksTarget() then
+                    debugPrint("DEBUG: Checking buff", spellType, "for member ID", memberID, "with spell:", bestSpell)
                     -- Only queue the buff if it is missing and not already queued for this member
-                    if not mq.TLO.Target.Buff(bestspellstring)() then
+                    if not mq.TLO.Target.Buff(bestSpell)() then
                         debugPrint("DEBUG: Buff", spellType, "missing for member ID", memberID)
                         if not queuedBuffs[memberID][spellType] then
                             debugPrint("DEBUG: Adding member ID", memberID, "to buffQueue for spell type:", spellType)
-                            table.insert(buffer.buffQueue, {memberID = memberID, spell = bestspellstring, spellType = spellType})
+                            table.insert(buffer.buffQueue, {memberID = memberID, spell = bestSpell, spellType = spellType})
                             queuedBuffs[memberID][spellType] = true -- Mark buff as queued for this member
                         else
                             debugPrint("DEBUG: Buff", spellType, "already queued for member ID", memberID, ". Skipping.")
