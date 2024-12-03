@@ -109,7 +109,7 @@ end
 local function queueRez(corpse, resSpell)
     local corpseName = corpse.CleanName()
     if validateCorpseForRez(corpse) and not res.resQueue[corpse.ID()] and not isOnCooldown(corpseName) then
-        table.insert(res.resQueue, {corpse = corpse, spell = resSpell, slot = 8})
+        table.insert(res.resQueue, {corpse = corpse, spell = resSpell, slot = 10})
         shuffleQueue(res.resQueue) -- Shuffle the queue after adding the corpse
     elseif isOnCooldown(corpseName) then
         return
@@ -258,7 +258,7 @@ local function processRezQueue()
                                     mq.delay(500)
                                 end
                             else
-                                mq.cmdf('/cast %d', resTask.slot)
+                                mq.cmdf('/cast %d', resTask.spell)
                                 while mq.TLO.Me.Casting() do
                                     mq.delay(200)
                                 end

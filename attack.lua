@@ -29,9 +29,9 @@ local function isTargetInRange(targetID, spellName)
 end
 
 -- Function to cast spell on the target
-local function castOnTarget(targetID, targetName, spellName)
+local function castOnTarget(targetID, spellName)
     -- Ensure we are targeting the right ID
-    if targetID ~= mq.TLO.Target.ID() then
+    if not mq.TLO.Target() or (mq.TLO.Target() and targetID ~= mq.TLO.Target.ID()) then
         mq.cmdf('/tar id %d', targetID)
         mq.delay(200)
     end
@@ -86,14 +86,11 @@ function attack.attackRoutine()
     mq.cmdf('/assist %s', gui.mainAssist)
     mq.delay(400)
 
-    local targetHP = mq.TLO.Target.PctHPs()
-    local targetDistance = mq.TLO.Target.Distance()
-    local targetID = mq.TLO.Target.ID()
-
-    if targetID and mq.TLO.Target.Type() == "NPC" and targetDistance <= gui.assistRange and targetHP <= gui.assistPercent and (targetHP > 40 or mq.TLO.Target.Named()) then
-        if mq.TLO.Target.AggroHolder() == gui.mainAssist and not mq.TLO.Target.Buff(bestAttackSpell)() then
+    if mq.TLO.Target() and mq.TLO.Target.Type() == "NPC" and mq.TLO.Target.Distance() and mq.TLO.Target.Distance() <= gui.assistRange and mq.TLO.Target.PctHPs() and mq.TLO.Target.PctHPs() <= gui.assistPercent and (mq.TLO.Target.PctHPs() > 40 or mq.TLO.Target.Named()) then
+        local targetID = mq.TLO.Target.ID()
+        if mq.TLO.Target() and not mq.TLO.Target.Buff(bestAttackSpell)() then
             if hasEnoughMana(bestAttackSpell) and mq.TLO.Me.SpellReady(bestAttackSpell)() and isTargetInRange(targetID, bestAttackSpell) and preCastChecks() then
-                castOnTarget(targetID, mq.TLO.Target.CleanName(), bestAttackSpell)
+                castOnTarget(targetID, bestAttackSpell)
             end
         end
     end
