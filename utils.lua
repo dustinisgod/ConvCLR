@@ -147,12 +147,9 @@ end
 
 local lastNavTime = 0
 
-local campSet = false  -- Track if camp is set
-
 function utils.monitorNav()
-
-    -- Additional camp distance or chase check if bot is on
-    if gui.botOn then
+    if gui.botOn and (gui.chaseon or gui.returntocamp) then
+        debugPrint("monitorNav")
         if not gui then
             printf("Error: gui is nil")
             return
@@ -161,11 +158,17 @@ function utils.monitorNav()
         local currentTime = os.time()
 
         if gui.returntocamp and (currentTime - lastNavTime >= 5) then
+            debugPrint("Checking camp distance.")
             nav.checkCampDistance()
             lastNavTime = currentTime
-        elseif gui.chaseOn then
+        elseif gui.chaseon and (currentTime - lastNavTime >= 2) then
+            debugPrint("Checking chase distance.")
             nav.chase()
+            lastNavTime = currentTime
         end
+    else
+        debugPrint("Bot is not active or pull is enabled. Exiting routine.")
+        return
     end
 end
 

@@ -43,9 +43,9 @@ local function setDefaultConfig()
     gui.sitMed = false
     gui.stopCast = false
     gui.stopCastPct = 95
-    gui.returnToCamp = false
+    gui.returntocamp = false
     gui.campDistance = 30
-    gui.chaseOn = false
+    gui.chaseon = false
     gui.chaseTarget = ""
     gui.chaseDistance = 20
     gui.useKarn = false
@@ -346,25 +346,25 @@ local function clericControlGUI()
     if ImGui.CollapsingHeader("Nav Settings") then
     ImGui.Spacing()
     
-        -- Track the previous states of returnToCamp and chaseOn to detect changes
-        local previousReturnToCamp = gui.returnToCamp or false
-        local previousChaseOn = gui.chaseOn or false
+        -- Track the previous states of returntocamp and chaseon to detect changes
+        local previousreturntocamp = gui.returntocamp or false
+        local previouschaseon = gui.chaseon or false
 
         -- Checkbox for Return to Camp with mutual exclusivity and clearing camp location if unchecked
-        local currentReturnToCamp = ImGui.Checkbox("Return To Camp", gui.returnToCamp or false)
-        if currentReturnToCamp ~= previousReturnToCamp then
-            gui.returnToCamp = currentReturnToCamp
-                if gui.returnToCamp then
-                    gui.chaseOn = false  -- Disable Chase if Return to Camp is enabled
+        local currentreturntocamp = ImGui.Checkbox("Return To Camp", gui.returntocamp or false)
+        if currentreturntocamp ~= previousreturntocamp then
+            gui.returntocamp = currentreturntocamp
+                if gui.returntocamp then
+                    gui.chaseon = false  -- Disable Chase if Return to Camp is enabled
                 else
                     local nav = require('nav')
                     nav.campLocation = nil  -- Clear camp location when Return to Camp is disabled
                     print("Camp location cleared.")
                 end
-            previousReturnToCamp = currentReturnToCamp  -- Update previous state
+            previousreturntocamp = currentreturntocamp  -- Update previous state
         end
 
-        if gui.returnToCamp then
+        if gui.returntocamp then
             ImGui.SameLine()
             ImGui.SetNextItemWidth(100)
             gui.campDistance = ImGui.SliderInt("Camp Distance", gui.campDistance, 5, 200)
@@ -377,20 +377,20 @@ local function clericControlGUI()
         end
 
         -- Checkbox for Chase with mutual exclusivity
-        local currentChaseOn = ImGui.Checkbox("Chase", gui.chaseOn or false)
-        if currentChaseOn ~= previousChaseOn then
+        local currentchaseon = ImGui.Checkbox("Chase", gui.chaseon or false)
+        if currentchaseon ~= previouschaseon then
             -- Update the GUI state and handle mutual exclusivity
-            gui.chaseOn = currentChaseOn
-                if gui.chaseOn then
+            gui.chaseon = currentchaseon
+                if gui.chaseon then
                     local nav = require('nav')
-                    gui.returnToCamp = false  -- Disable Return to Camp if Chase is enabled
+                    gui.returntocamp = false  -- Disable Return to Camp if Chase is enabled
                     nav.campLocation = nil  -- Clear camp location when Return to Camp is disabled
                     print("Camp location cleared.")
                 end
-            previousChaseOn = currentChaseOn  -- Update previous state
+            previouschaseon = currentchaseon  -- Update previous state
         end
 
-        if gui.chaseOn then
+        if gui.chaseon then
             ImGui.SameLine()
             ImGui.SetNextItemWidth(100)
             gui.chaseTarget = ImGui.InputText("Name", gui.chaseTarget)

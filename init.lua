@@ -8,6 +8,14 @@ local res = require('res')
 local nav = require('nav')
 local buffer = require('buffer')
 
+local DEBUG_MODE = false
+-- Debug print helper function
+local function debugPrint(...)
+    if DEBUG_MODE then
+        print(...)
+    end
+end
+
 local class = mq.TLO.Me.Class()
 if class ~= "Cleric" then
     print("This script is only for Clerics.")
@@ -48,7 +56,7 @@ end
 local toggleboton = gui.botOn or false
 
 local function returnChaseToggle()
-    if gui.botOn and gui.returnToCamp and not toggleboton then
+    if gui.botOn and gui.returntocamp and not toggleboton then
         -- Run setCamp only once when gui.botOn is checked
         nav.setCamp()
         toggleboton = true
@@ -67,27 +75,34 @@ while gui.clericControlGUI do
 
         checkBotOn(charLevel)
 
+        debugPrint("Checking for navigation.")
         utils.monitorNav()
 
+        debugPrint("Checking for healing.")
         healing.healRoutine()
 
         if gui.useRez then
+            debugPrint("Checking for resurrection.")
             utils.monitorRes()
         end
 
         if gui.sitMed then
+            debugPrint("Checking for sit/med.")
             utils.sitMed()
         end
 
         if gui.useKarn then
+            debugPrint("Checking for Karn's Touch.")
             utils.monitorAttack()
         end
 
         if gui.buffsOn then
+            debugPrint("Checking for buffs.")
             utils.monitorBuffs()
         end
 
         if gui.useCures then
+            debugPrint("Checking for cures.")
             utils.monitorCures()
         end
 
