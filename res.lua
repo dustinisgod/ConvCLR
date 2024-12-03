@@ -258,7 +258,7 @@ local function processRezQueue()
                                     mq.delay(500)
                                 end
                             else
-                                mq.cmdf('/cast %d', resTask.spell)
+                                mq.cmdf('/cast %s', resTask.spell)
                                 while mq.TLO.Me.Casting() do
                                     mq.delay(200)
                                 end
