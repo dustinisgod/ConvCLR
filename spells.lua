@@ -106,14 +106,14 @@ function spells.findBestSpell(spellType, charLevel)
     end
 
     -- Skip buffaegis and buffshield if cleric level is 58 or higher, as Aegolism line covers all three buffs
-    if charLevel >= 58 and (spellType == "buffsymbol" or spellType == "buffshield") then
+    if charLevel >= 58 and gui.buffaegis and not gui.buffdruidskin and (spellType == "buffsymbol" or spellType == "buffshield") then
         debugPrint("Skipping " .. spellType .. " because cleric level is " .. charLevel .. " and Aegolism line covers this.")
         return nil
     end
 
     -- Special case for BuffACHP at level 60, preferring "Blessing of Aegolism" if available
     if spellType == "buffaegis" and charLevel == 60 then
-        if mq.TLO.Me.Book('Blessing of Aegolism')() then
+        if mq.TLO.Me.Book('Blessing of Aegolism')() and not gui.buffdruidskin then
             debugPrint("Using Blessing of Aegolism for BuffACHP at level 60")
             return "Blessing of Aegolism"
         else

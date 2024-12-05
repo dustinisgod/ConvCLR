@@ -29,6 +29,7 @@ local function setDefaultConfig()
     gui.buffGroup = false
     gui.buffRaid = false
     gui.buffaegis = false
+    gui.buffdruidskin = false
     gui.buffsymbol = false
     gui.buffshield = false
     gui.buffmagic = false
@@ -303,9 +304,13 @@ local function clericControlGUI()
             ImGui.Separator()
 
             gui.buffaegis = ImGui.Checkbox("Aegis", gui.buffaegis or false)
-            ImGui.SameLine()
+            if gui.buffaegis then
+                ImGui.SameLine()
+                gui.buffdruidskin = ImGui.Checkbox("Druid Skin", gui.buffdruidskin or false)
+            end
+            ImGui.Spacing()
             gui.buffsymbol = ImGui.Checkbox("Symbol", gui.buffsymbol or false)
-            ImGui.SameLine()
+            ImGui.Spacing()
             gui.buffshield = ImGui.Checkbox("Shield", gui.buffshield or false)
             ImGui.Separator()
 
