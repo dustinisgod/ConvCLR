@@ -53,6 +53,7 @@ local function setSitMed(value) setToggleOption("sitMed", value, "Sit Med") end
 local function setKarn(value) setToggleOption("useKarn", value, "Mark of Karn") end
 local function setStopCast(value) setToggleOption("stopCast", value, "Stop Cast") end
 local function setBuffsOnOff(value) setToggleOption("buffsOn", value, "Buffs Toggle") end
+local function setDruidSkin(value) setToggleOption("buffdruidskin", value, "Druid Skin") end
 
 -- Functions for setting slider values
 local function setMainHealPct(value)
@@ -204,6 +205,8 @@ local function commandHandler(command, ...)
         setBuffRaid(args[1])
     elseif command == "aegis" then
         setAchpBuff(args[1])
+    elseif command == "druidskin" then
+        setDruidSkin(args[1])
     elseif command == "symbol" then
         setHpOnlyBuff(args[1])
     elseif command == "shield" then
